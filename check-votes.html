@@ -38,16 +38,39 @@
             <h2>Thông tin chung</h2>
             <table>
                 <tr>
-                    <td><strong>Tổng số cử tri:</strong></td>
-                    <td><input type="number" id="totalVoters" value="0"></td>
-                    <td><strong>Số phiếu bất hợp lệ:</strong></td>
-                    <td><input type="number" id="invalidVotes" value="0"></td>
+                    <td><strong>Tổng số cử tri của đơn vị bầu cử:</strong></td>
+                    <td><input type="number" id="totalVotersUnit" value="0" oninput="onInputChange('general')"></td>
+                    <td><strong>Số cử tri đã tham gia bỏ phiếu:</strong></td>
+                    <td><input type="number" id="actualVoters" value="0" oninput="updateCalculations(); onInputChange('general')"></td>
                 </tr>
                 <tr>
-                    <td colspan="3"><strong>Số phiếu hợp lệ:</strong></td>
-                    <td><strong id="validVotes" style="color: blue; font-size: 1.2em;">0</strong></td>
+                    <td colspan="3"><strong>Tỷ lệ cử tri tham gia:</strong></td>
+                    <td><strong id="voterTurnout" style="color: blue; font-size: 1.1em;">0%</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Số phiếu phát ra:</strong></td>
+                    <td><input type="number" id="issuedBallots" value="0" oninput="onInputChange('general')"></td>
+                    <td><strong>Số phiếu thu vào:</strong></td>
+                    <td><input type="number" id="collectedBallots" value="0" oninput="updateCalculations(); onInputChange('general')"></td>
+                </tr>
+                <tr>
+                    <td><strong>Số phiếu không hợp lệ:</strong></td>
+                    <td><input type="number" id="invalidVotes" value="0" oninput="updateCalculations(); onInputChange('general')"></td>
+                    <td><strong>Số phiếu hợp lệ:</strong></td>
+                    <td><strong id="validVotesCalc" style="color: green; font-size: 1.2em;">0</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>Tỷ lệ phiếu hợp lệ:</strong></td>
+                    <td><strong id="validVotesRate" style="color: green; font-size: 1.1em;">0%</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>Tỷ lệ phiếu không hợp lệ:</strong></td>
+                    <td><strong id="invalidVotesRate" style="color: red; font-size: 1.1em;">0%</strong></td>
                 </tr>
             </table>
+            <div class="btn-center">
+                <button id="btn-general" onclick="checkVotes('general')">Xác nhận đã nhập xong</button>
+            </div>
         </div>
 
         <div class="vote-table">
@@ -85,7 +108,7 @@
         <div style="text-align: center; margin: 40px 0;">
             <button onclick="calculateTotalResults()" style="background-color: #1E29FF; font-size: 15px; padding: 20px 40px;">
                 <span style="font-size: 16px; font-weight: bold; text-transform: uppercase;">XEM TỔNG KẾT CUỐI CÙNG</span><br>
-                <span style="font-size: 12px;">(Sau khi đã nhập xong 2 mục trên)</span>
+                <span style="font-size: 12px;">(Sau khi đã xác nhận xong 3 mục trên)</span>
             </button>
         </div>
 
@@ -118,11 +141,13 @@
 
         // Trạng thái xác nhận và lưu dữ liệu
         let confirmedStatus = {
+            'general': false,
             'combined': false,
             'g2': false
         };
         
         let savedData = {
+            'general': {},
             'combined': {},
             'g2': {}
         };
@@ -152,17 +177,33 @@
                     </tr>`;
             });
 
-            updateValidVotes();
+            updateCalculations();
         };
 
-        // Cập nhật số phiếu hợp lệ
-        document.getElementById('totalVoters').addEventListener('input', updateValidVotes);
-        document.getElementById('invalidVotes').addEventListener('input', updateValidVotes);
+        // Cập nhật các tính toán
+        document.getElementById('totalVotersUnit').addEventListener('input', updateCalculations);
         
-        function updateValidVotes() {
-            const total = parseInt(document.getElementById('totalVoters').value) || 0;
-            const invalid = parseInt(document.getElementById('invalidVotes').value) || 0;
-            document.getElementById('validVotes').textContent = total - invalid;
+        function updateCalculations() {
+            const totalVotersUnit = parseInt(document.getElementById('totalVotersUnit').value) || 0;
+            const actualVoters = parseInt(document.getElementById('actualVoters').value) || 0;
+            const collectedBallots = parseInt(document.getElementById('collectedBallots').value) || 0;
+            const invalidVotes = parseInt(document.getElementById('invalidVotes').value) || 0;
+            
+            // Tính phiếu hợp lệ = phiếu thu vào - phiếu không hợp lệ
+            const validVotes = collectedBallots - invalidVotes;
+            document.getElementById('validVotesCalc').textContent = validVotes >= 0 ? validVotes : 0;
+            
+            // Tỷ lệ cử tri tham gia
+            const turnout = totalVotersUnit > 0 ? ((actualVoters / totalVotersUnit) * 100).toFixed(2) : 0;
+            document.getElementById('voterTurnout').textContent = turnout + '%';
+            
+            // Tỷ lệ phiếu hợp lệ
+            const validRate = collectedBallots > 0 ? ((validVotes / collectedBallots) * 100).toFixed(2) : 0;
+            document.getElementById('validVotesRate').textContent = validRate + '%';
+            
+            // Tỷ lệ phiếu không hợp lệ
+            const invalidRate = collectedBallots > 0 ? ((invalidVotes / collectedBallots) * 100).toFixed(2) : 0;
+            document.getElementById('invalidVotesRate').textContent = invalidRate + '%';
         }
 
         // Xử lý khi người dùng nhập dữ liệu
@@ -171,13 +212,28 @@
                 confirmedStatus[type] = false;
                 const btn = document.getElementById('btn-' + type);
                 btn.classList.remove('confirmed');
-                btn.textContent = type === 'combined' ? 'Xác nhận đã nhập xong' : 'Xác nhận đã nhập xong';
+                if (type === 'general') {
+                    btn.textContent = 'Xác nhận đã nhập xong';
+                } else if (type === 'combined') {
+                    btn.textContent = 'Xác nhận đã nhập xong';
+                } else {
+                    btn.textContent = 'Xác nhận đã nhập xong';
+                }
             }
         }
 
         // Xác nhận dữ liệu
         function checkVotes(type) {
-            if (type === 'combined') {
+            if (type === 'general') {
+                savedData.general = {
+                    totalVotersUnit: parseInt(document.getElementById('totalVotersUnit').value) || 0,
+                    actualVoters: parseInt(document.getElementById('actualVoters').value) || 0,
+                    issuedBallots: parseInt(document.getElementById('issuedBallots').value) || 0,
+                    collectedBallots: parseInt(document.getElementById('collectedBallots').value) || 0,
+                    invalidVotes: parseInt(document.getElementById('invalidVotes').value) || 0,
+                    validVotes: parseInt(document.getElementById('validVotesCalc').textContent) || 0
+                };
+            } else if (type === 'combined') {
                 candidateKeys.forEach(key => {
                     savedData.combined[key] = parseInt(document.getElementById(`vote_combined_${key}`).value) || 0;
                 });
@@ -192,15 +248,24 @@
             btn.classList.add('confirmed');
             btn.textContent = '✓ Đã xác nhận';
             
-            const message = type === 'combined' 
-                ? "Đã lưu dữ liệu Kiểm xuôi (Gạch 4 + Gạch 3)" 
-                : "Đã lưu dữ liệu Gạch 2";
+            let message = '';
+            if (type === 'general') {
+                message = "Đã lưu dữ liệu Thông tin chung";
+            } else if (type === 'combined') {
+                message = "Đã lưu dữ liệu Kiểm xuôi (Gạch 4 + Gạch 3)";
+            } else {
+                message = "Đã lưu dữ liệu Gạch 2";
+            }
             alert(message + ". Nhấn 'XEM TỔNG KẾT' để xem kết quả cuối cùng.");
         }
 
         // Tính tổng kết
         function calculateTotalResults() {
-            const validVotes = parseInt(document.getElementById('validVotes').textContent) || 0;
+            // Lấy dữ liệu từ bộ nhớ đã lưu
+            const collectedBallots = savedData.general.collectedBallots || 0;
+            const invalidVotes = savedData.general.invalidVotes || 0;
+            const validVotes = savedData.general.validVotes || 0;
+            
             finalResults = { 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0 };
 
             // 1. Tính từ dữ liệu đã lưu của Gạch 4 + Gạch 3 (Kiểm xuôi)
@@ -236,36 +301,47 @@
 
         // Xuất file Excel
         function exportToExcel() {
-            const totalVoters = parseInt(document.getElementById('totalVoters').value) || 0;
-            const invalidVotes = parseInt(document.getElementById('invalidVotes').value) || 0;
-            const validVotes = parseInt(document.getElementById('validVotes').textContent) || 0;
+            // Lấy dữ liệu từ bộ nhớ đã lưu
+            const totalVotersUnit = savedData.general.totalVotersUnit || 0;
+            const actualVoters = savedData.general.actualVoters || 0;
+            const issuedBallots = savedData.general.issuedBallots || 0;
+            const collectedBallots = savedData.general.collectedBallots || 0;
+            const invalidVotes = savedData.general.invalidVotes || 0;
+            const validVotes = savedData.general.validVotes || 0;
+            
+            const voterTurnout = totalVotersUnit > 0 ? ((actualVoters / totalVotersUnit) * 100).toFixed(2) : 0;
+            const validRate = collectedBallots > 0 ? ((validVotes / collectedBallots) * 100).toFixed(2) : 0;
+            const invalidRate = collectedBallots > 0 ? ((invalidVotes / collectedBallots) * 100).toFixed(2) : 0;
 
             // Tạo workbook
             const wb = XLSX.utils.book_new();
 
-            // Sheet 1: Thông tin tổng quan
+            // Sheet 1: Báo cáo tổng hợp
             const summaryData = [
-                ['KẾT QUẢ KIỂM PHIẾU BẦU CỬ'],
+                ['BIÊN BẢN KIỂM PHIẾU BẦU CỬ'],
                 ['Ngày xuất: ' + new Date().toLocaleString('vi-VN')],
                 [],
-                ['THÔNG TIN CHUNG'],
-                ['Tổng số cử tri:', totalVoters],
-                ['Số phiếu bất hợp lệ:', invalidVotes],
-                ['Số phiếu hợp lệ:', validVotes],
+                ['THÔNG TIN BẦU CỬ'],
+                ['Số cử tri đã tham gia bỏ phiếu:', actualVoters + ' người'],
+                ['Tỷ lệ cử tri đã tham gia bỏ phiếu so với tổng số cử tri của đơn vị bầu cử:', voterTurnout + '%'],
+                ['Số phiếu phát ra:', issuedBallots + ' phiếu'],
+                ['Số phiếu thu vào:', collectedBallots + ' phiếu'],
+                ['Số phiếu hợp lệ:', validVotes + ' phiếu', 'Tỷ lệ so với tổng số phiếu thu vào: ' + validRate + '%'],
+                ['Số phiếu không hợp lệ:', invalidVotes + ' phiếu', 'Tỷ lệ so với tổng số phiếu thu vào: ' + invalidRate + '%'],
                 [],
                 ['KẾT QUẢ BẦU CỬ'],
-                ['STT', 'Ứng viên', 'Số phiếu được bầu', 'Tỷ lệ (%)']
+                ['Số phiếu bầu cho mỗi người ứng cử như sau:'],
+                []
             ];
 
-            // Thêm dữ liệu ứng viên
+            // Thêm dữ liệu ứng viên (sắp xếp theo số phiếu giảm dần)
             const sorted = Object.keys(finalResults).sort((a,b) => finalResults[b] - finalResults[a]);
             sorted.forEach((key, index) => {
-                const pct = validVotes > 0 ? ((finalResults[key] / (validVotes * 3)) * 100).toFixed(2) : 0;
+                const votePct = validVotes > 0 ? ((finalResults[key] / (validVotes * 3)) * 100).toFixed(2) : 0;
                 summaryData.push([
-                    index + 1,
-                    candidates[key],
-                    finalResults[key],
-                    pct
+                    (index + 1) + '. ' + candidates[key],
+                    'được ' + finalResults[key] + ' phiếu/' + (validVotes * 3) + ' phiếu hợp lệ',
+                    votePct + '%'
                 ]);
             });
 
@@ -273,15 +349,35 @@
             
             // Định dạng độ rộng cột
             ws1['!cols'] = [
-                { wch: 5 },
-                { wch: 25 },
-                { wch: 20 },
+                { wch: 50 },
+                { wch: 35 },
                 { wch: 15 }
             ];
 
-            XLSX.utils.book_append_sheet(wb, ws1, 'Tổng hợp');
+            XLSX.utils.book_append_sheet(wb, ws1, 'Biên bản tổng hợp');
 
-            // Sheet 2: Chi tiết kiểm xuôi
+            // Sheet 2: Bảng thống kê chi tiết
+            const detailTable = [
+                ['BẢNG THỐNG KÊ CHI TIẾT'],
+                [],
+                ['STT', 'Ứng viên', 'Số phiếu được bầu', 'Tỷ lệ (%)']
+            ];
+
+            sorted.forEach((key, index) => {
+                const votePct = validVotes > 0 ? ((finalResults[key] / (validVotes * 3)) * 100).toFixed(2) : 0;
+                detailTable.push([
+                    index + 1,
+                    candidates[key],
+                    finalResults[key],
+                    votePct
+                ]);
+            });
+
+            const ws2 = XLSX.utils.aoa_to_sheet(detailTable);
+            ws2['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }, { wch: 15 }];
+            XLSX.utils.book_append_sheet(wb, ws2, 'Thống kê chi tiết');
+
+            // Sheet 3: Chi tiết kiểm xuôi
             const detailData1 = [
                 ['CHI TIẾT KIỂM XUÔI (Gạch 4 + Gạch 3)'],
                 [],
@@ -296,11 +392,11 @@
                 ]);
             });
 
-            const ws2 = XLSX.utils.aoa_to_sheet(detailData1);
-            ws2['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 20 }];
-            XLSX.utils.book_append_sheet(wb, ws2, 'Chi tiết Kiểm xuôi');
+            const ws3 = XLSX.utils.aoa_to_sheet(detailData1);
+            ws3['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(wb, ws3, 'Chi tiết Kiểm xuôi');
 
-            // Sheet 3: Chi tiết kiểm ngược
+            // Sheet 4: Chi tiết kiểm ngược
             const detailData2 = [
                 ['CHI TIẾT KIỂM NGƯỢC (Gạch 2)'],
                 [],
@@ -316,12 +412,12 @@
                 ]);
             });
 
-            const ws3 = XLSX.utils.aoa_to_sheet(detailData2);
-            ws3['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 15 }];
-            XLSX.utils.book_append_sheet(wb, ws3, 'Chi tiết Kiểm ngược');
+            const ws4 = XLSX.utils.aoa_to_sheet(detailData2);
+            ws4['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 15 }];
+            XLSX.utils.book_append_sheet(wb, ws4, 'Chi tiết Kiểm ngược');
 
             // Xuất file
-            const fileName = `Ket_qua_bau_cu_${new Date().toISOString().slice(0,10)}.xlsx`;
+            const fileName = `Bien_ban_kiem_phieu_${new Date().toISOString().slice(0,10)}.xlsx`;
             XLSX.writeFile(wb, fileName);
             
             alert('Đã xuất file Excel thành công!');
