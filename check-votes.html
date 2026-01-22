@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm phiếu bầu cử 5 bầu 3</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; background-color: #f0f2f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #1E29FF; text-align: center; }
+        h2 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 5px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px; font-weight: bold; transition: background-color 0.3s; }
+        button:hover { background-color: #45a049; }
+        button.confirmed { background-color: #808080; }
+        button.confirmed:hover { background-color: #707070; }
+        .vote-table { margin: 20px 0; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .check-type { background-color: #e7f3ff; padding: 10px; margin-bottom: 10px; border-left: 2px solid #2196F3; border-right: 2px solid #2196F3; font-weight: bold; }
+        .error-message { color: #d32f2f; background-color: #ffebee; padding: 10px; margin: 10px 0; border-radius: 4px; display: none; }
+        .summary { background-color: #e9f7ef; padding: 20px; border-radius: 8px; margin-top: 30px; }
+        .btn-center { text-align: center; margin-top: 15px; }
+        .combined-table td { text-align: center; }
+        .combined-table input { text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MÁY TÍNH KIỂM PHIẾU BẦU CỬ</h1>
+        
+        <div class="vote-table">
+            <h2>Thông tin chung</h2>
+            <table>
+                <tr>
+                    <td><strong>Tổng số cử tri:</strong></td>
+                    <td><input type="number" id="totalVoters" value="0"></td>
+                    <td><strong>Số phiếu bất hợp lệ:</strong></td>
+                    <td><input type="number" id="invalidVotes" value="0"></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>Số phiếu hợp lệ:</strong></td>
+                    <td><strong id="validVotes" style="color: blue; font-size: 1.2em;">0</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="vote-table">
+            <h2>1. KIỂM XUÔI: Gạch 4 (Bầu 1) và Gạch 3 (Bầu 2)</h2>
+            <div class="check-type">Nhập số phiếu ĐƯỢC BẦU cho từng người (tổng cộng cả 2 loại phiếu)</div>
+            <table class="combined-table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Người được bầu</th>
+                        <th>Số phiếu được bầu<br>(Gạch 4 + Gạch 3)</th>
+                    </tr>
+                </thead>
+                <tbody id="body-combined"></tbody>
+            </table>
+            <div class="btn-center">
+                <button id="btn-combined" onclick="checkVotes('combined')">Xác nhận Kiểm xuôi</button>
+            </div>
+            <div id="result_combined"></div>
+        </div>
+
+        <div class="vote-table">
+            <h2>2. KIỂM NGƯỢC: Gạch 2 (Bầu 3)</h2>
+            <div class="check-type">Nhập số phiếu theo cặp BỊ GẠCH</div>
+            <table id="table-g2">
+                <thead><tr><th>STT</th><th>Cặp ứng viên BỊ GẠCH</th><th>Số phiếu</th></tr></thead>
+                <tbody id="body-g2"></tbody>
+            </table>
+            <div class="btn-center">
+                <button id="btn-g2" onclick="checkVotes('g2')">Xác nhận Gạch 2</button>
+            </div>
+            <div id="result_g2"></div>
+        </div>
+
+        <div style="text-align: center; margin: 40px 0;">
+            <button onclick="calculateTotalResults()" style="background-color: #1E29FF; font-size: 20px; padding: 20px 40px;">XEM TỔNG KẾT CUỐI CÙNG</button>
+        </div>
+
+        <div id="totalResults" class="summary">
+            <h2>KẾT QUẢ TỔNG HỢP</h2>
+            <div id="totalError" class="error-message"></div>
+            <table id="resultsTable">
+                <thead><tr><th>Ứng viên</th><th>Số phiếu ĐƯỢC BẦU</th><th>Tỷ lệ (%)</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+
+        // Khai báo các tổ hợp cặp
+        const pairs = [
+            {ids: ['A','B']}, {ids: ['A','C']}, {ids: ['A','D']}, {ids: ['A','E']},
+            {ids: ['B','C']}, {ids: ['B','D']}, {ids: ['B','E']},
+            {ids: ['C','D']}, {ids: ['C','E']}, {ids: ['D','E']}
+        ];
+
+        // Trạng thái xác nhận và lưu dữ liệu
+        let confirmedStatus = {
+            'combined': false,
+            'g2': false
+        };
+        
+        let savedData = {
+            'combined': {},
+            'g2': {}
+        };
+
+        // Tự động đổ tên vào bảng khi mở trang
+        window.onload = function() {
+            // Đổ bảng gộp Gạch 4 và Gạch 3
+            const bodyCombined = document.getElementById('body-combined');
+            candidateKeys.forEach((key, index) => {
+                bodyCombined.innerHTML += `
+                    <tr>
+                        <td>${index+1}</td>
+                        <td>${candidates[key]}</td>
+                        <td><input type="number" id="vote_combined_${key}" value="0" oninput="onInputChange('combined')"></td>
+                    </tr>`;
+            });
+
+            // Đổ Gạch 2 (Bầu 3)
+            const bodyG2 = document.getElementById('body-g2');
+            pairs.forEach((pair, index) => {
+                const names = pair.ids.map(id => candidates[id]).join(' và ');
+                bodyG2.innerHTML += `
+                    <tr>
+                        <td>${index+1}</td>
+                        <td>${names}</td>
+                        <td><input type="number" id="vote_g2_${index}" value="0" oninput="onInputChange('g2')"></td>
+                    </tr>`;
+            });
+
+            updateValidVotes();
+        };
+
+        // Cập nhật số phiếu hợp lệ
+        document.getElementById('totalVoters').addEventListener('input', updateValidVotes);
+        document.getElementById('invalidVotes').addEventListener('input', updateValidVotes);
+        
+        function updateValidVotes() {
+            const total = parseInt(document.getElementById('totalVoters').value) || 0;
+            const invalid = parseInt(document.getElementById('invalidVotes').value) || 0;
+            document.getElementById('validVotes').textContent = total - invalid;
+        }
+
+        // Xử lý khi người dùng nhập dữ liệu
+        function onInputChange(type) {
+            if (confirmedStatus[type]) {
+                confirmedStatus[type] = false;
+                const btn = document.getElementById('btn-' + type);
+                btn.classList.remove('confirmed');
+                btn.textContent = type === 'combined' ? 'Xác nhận Kiểm xuôi' : 'Xác nhận Gạch 2';
+            }
+        }
+
+        // Xác nhận dữ liệu
+        function checkVotes(type) {
+            // Lưu dữ liệu vào savedData
+            if (type === 'combined') {
+                candidateKeys.forEach(key => {
+                    savedData.combined[key] = parseInt(document.getElementById(`vote_combined_${key}`).value) || 0;
+                });
+            } else if (type === 'g2') {
+                pairs.forEach((pair, index) => {
+                    savedData.g2[index] = parseInt(document.getElementById(`vote_g2_${index}`).value) || 0;
+                });
+            }
+            
+            confirmedStatus[type] = true;
+            const btn = document.getElementById('btn-' + type);
+            btn.classList.add('confirmed');
+            btn.textContent = type === 'combined' ? '✓ Đã xác nhận' : '✓ Đã xác nhận';
+            
+            const message = type === 'combined' 
+                ? "Đã lưu dữ liệu Kiểm xuôi (Gạch 4 + Gạch 3)" 
+                : "Đã lưu dữ liệu Gạch 2";
+            alert(message + ". Nhấn 'XEM TỔNG KẾT' để xem kết quả cuối cùng.");
+        }
+
+        // Tính tổng kết
+        function calculateTotalResults() {
+            const validVotes = parseInt(document.getElementById('validVotes').textContent) || 0;
+            let finalResults = { 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0 };
+
+            // 1. Tính từ dữ liệu đã lưu của Gạch 4 + Gạch 3 (Kiểm xuôi)
+            candidateKeys.forEach(key => {
+                finalResults[key] += savedData.combined[key] || 0;
+            });
+
+            // 2. Tính Gạch 2 (Kiểm ngược: Phiếu được bầu = Tổng hợp lệ - Phiếu bị gạch)
+            pairs.forEach((pair, index) => {
+                const rejectedVal = savedData.g2[index] || 0;
+                const electedVal = validVotes - rejectedVal;
+                // Nếu bị gạch cặp này thì những người còn lại được bầu
+                candidateKeys.forEach(id => {
+                    if (!pair.ids.includes(id)) finalResults[id] += electedVal;
+                });
+            });
+
+            // Hiển thị bảng kết quả
+            const tbody = document.querySelector('#resultsTable tbody');
+            tbody.innerHTML = '';
+            const sorted = Object.keys(finalResults).sort((a,b) => finalResults[b] - finalResults[a]);
+            
+            sorted.forEach(key => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = candidates[key];
+                row.insertCell(1).textContent = finalResults[key];
+                const pct = validVotes > 0 ? ((finalResults[key] / (validVotes * 3)) * 100).toFixed(2) : 0;
+                row.insertCell(2).textContent = pct + '%';
+            });
+            
+            document.getElementById('totalResults').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
