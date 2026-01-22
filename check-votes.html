@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kiểm phiếu bầu cử 5 bầu 3</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; background-color: #f0f2f5; }
         .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -24,6 +25,9 @@
         .btn-center { text-align: center; margin-top: 15px; }
         .combined-table td { text-align: center; }
         .combined-table input { text-align: center; }
+        .export-btn { background-color: #28a745; margin-top: 20px; padding: 15px 30px; font-size: 16px; }
+        .export-btn:hover { background-color: #218838; }
+        .export-btn:disabled { background-color: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -79,24 +83,31 @@
         </div>
 
         <div style="text-align: center; margin: 40px 0;">
-    <button onclick="calculateTotalResults()" style="background-color: #1E29FF; font-size: 15px; padding: 20px 40px;">
-        <span style="font-size: 16px; font-weight: bold; text-transform: uppercase;">XEM TỔNG KẾT CUỐI CÙNG</span><br>
-        <span style="font-size: 12px;">(Sau khi đã nhập xong 2 mục trên)</span>
-    </button>
-    </div>
+            <button onclick="calculateTotalResults()" style="background-color: #1E29FF; font-size: 15px; padding: 20px 40px;">
+                <span style="font-size: 16px; font-weight: bold; text-transform: uppercase;">XEM TỔNG KẾT CUỐI CÙNG</span><br>
+                <span style="font-size: 12px;">(Sau khi đã nhập xong 2 mục trên)</span>
+            </button>
+        </div>
 
-        <div id="totalResults" class="summary">
+        <div id="totalResults" class="summary" style="display: none;">
             <h2>KẾT QUẢ TỔNG HỢP</h2>
             <div id="totalError" class="error-message"></div>
             <table id="resultsTable">
                 <thead><tr><th>Ứng viên</th><th>Số phiếu ĐƯỢC BẦU</th><th>Tỷ lệ (%)</th></tr></thead>
                 <tbody></tbody>
             </table>
+            
+            <div class="btn-center">
+                <button class="export-btn" onclick="exportToExcel()">
+                    📊 XUẤT KẾT QUẢ RA FILE EXCEL
+                </button>
+            </div>
         </div>
     </div>
 
     <script src="config.js"></script>
     <script>
+        // Dữ liệu ứng viên được load từ config.js
 
         // Khai báo các tổ hợp cặp
         const pairs = [
@@ -116,9 +127,10 @@
             'g2': {}
         };
 
+        let finalResults = {};
+
         // Tự động đổ tên vào bảng khi mở trang
         window.onload = function() {
-            // Đổ bảng gộp Gạch 4 và Gạch 3
             const bodyCombined = document.getElementById('body-combined');
             candidateKeys.forEach((key, index) => {
                 bodyCombined.innerHTML += `
@@ -129,7 +141,6 @@
                     </tr>`;
             });
 
-            // Đổ Gạch 2 (Bầu 3)
             const bodyG2 = document.getElementById('body-g2');
             pairs.forEach((pair, index) => {
                 const names = pair.ids.map(id => candidates[id]).join(' và ');
@@ -160,13 +171,12 @@
                 confirmedStatus[type] = false;
                 const btn = document.getElementById('btn-' + type);
                 btn.classList.remove('confirmed');
-                btn.textContent = type === 'combined' ? 'Xác nhận Kiểm xuôi' : 'Xác nhận Gạch 2';
+                btn.textContent = type === 'combined' ? 'Xác nhận đã nhập xong' : 'Xác nhận đã nhập xong';
             }
         }
 
         // Xác nhận dữ liệu
         function checkVotes(type) {
-            // Lưu dữ liệu vào savedData
             if (type === 'combined') {
                 candidateKeys.forEach(key => {
                     savedData.combined[key] = parseInt(document.getElementById(`vote_combined_${key}`).value) || 0;
@@ -180,7 +190,7 @@
             confirmedStatus[type] = true;
             const btn = document.getElementById('btn-' + type);
             btn.classList.add('confirmed');
-            btn.textContent = type === 'combined' ? '✓ Đã xác nhận' : '✓ Đã xác nhận';
+            btn.textContent = '✓ Đã xác nhận';
             
             const message = type === 'combined' 
                 ? "Đã lưu dữ liệu Kiểm xuôi (Gạch 4 + Gạch 3)" 
@@ -191,7 +201,7 @@
         // Tính tổng kết
         function calculateTotalResults() {
             const validVotes = parseInt(document.getElementById('validVotes').textContent) || 0;
-            let finalResults = { 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0 };
+            finalResults = { 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0 };
 
             // 1. Tính từ dữ liệu đã lưu của Gạch 4 + Gạch 3 (Kiểm xuôi)
             candidateKeys.forEach(key => {
@@ -202,7 +212,6 @@
             pairs.forEach((pair, index) => {
                 const rejectedVal = savedData.g2[index] || 0;
                 const electedVal = validVotes - rejectedVal;
-                // Nếu bị gạch cặp này thì những người còn lại được bầu
                 candidateKeys.forEach(id => {
                     if (!pair.ids.includes(id)) finalResults[id] += electedVal;
                 });
@@ -221,7 +230,101 @@
                 row.insertCell(2).textContent = pct + '%';
             });
             
+            document.getElementById('totalResults').style.display = 'block';
             document.getElementById('totalResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Xuất file Excel
+        function exportToExcel() {
+            const totalVoters = parseInt(document.getElementById('totalVoters').value) || 0;
+            const invalidVotes = parseInt(document.getElementById('invalidVotes').value) || 0;
+            const validVotes = parseInt(document.getElementById('validVotes').textContent) || 0;
+
+            // Tạo workbook
+            const wb = XLSX.utils.book_new();
+
+            // Sheet 1: Thông tin tổng quan
+            const summaryData = [
+                ['KẾT QUẢ KIỂM PHIẾU BẦU CỬ'],
+                ['Ngày xuất: ' + new Date().toLocaleString('vi-VN')],
+                [],
+                ['THÔNG TIN CHUNG'],
+                ['Tổng số cử tri:', totalVoters],
+                ['Số phiếu bất hợp lệ:', invalidVotes],
+                ['Số phiếu hợp lệ:', validVotes],
+                [],
+                ['KẾT QUẢ BẦU CỬ'],
+                ['STT', 'Ứng viên', 'Số phiếu được bầu', 'Tỷ lệ (%)']
+            ];
+
+            // Thêm dữ liệu ứng viên
+            const sorted = Object.keys(finalResults).sort((a,b) => finalResults[b] - finalResults[a]);
+            sorted.forEach((key, index) => {
+                const pct = validVotes > 0 ? ((finalResults[key] / (validVotes * 3)) * 100).toFixed(2) : 0;
+                summaryData.push([
+                    index + 1,
+                    candidates[key],
+                    finalResults[key],
+                    pct
+                ]);
+            });
+
+            const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+            
+            // Định dạng độ rộng cột
+            ws1['!cols'] = [
+                { wch: 5 },
+                { wch: 25 },
+                { wch: 20 },
+                { wch: 15 }
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws1, 'Tổng hợp');
+
+            // Sheet 2: Chi tiết kiểm xuôi
+            const detailData1 = [
+                ['CHI TIẾT KIỂM XUÔI (Gạch 4 + Gạch 3)'],
+                [],
+                ['STT', 'Ứng viên', 'Số phiếu được bầu']
+            ];
+
+            candidateKeys.forEach((key, index) => {
+                detailData1.push([
+                    index + 1,
+                    candidates[key],
+                    savedData.combined[key] || 0
+                ]);
+            });
+
+            const ws2 = XLSX.utils.aoa_to_sheet(detailData1);
+            ws2['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(wb, ws2, 'Chi tiết Kiểm xuôi');
+
+            // Sheet 3: Chi tiết kiểm ngược
+            const detailData2 = [
+                ['CHI TIẾT KIỂM NGƯỢC (Gạch 2)'],
+                [],
+                ['STT', 'Cặp ứng viên bị gạch', 'Số phiếu']
+            ];
+
+            pairs.forEach((pair, index) => {
+                const names = pair.ids.map(id => candidates[id]).join(' và ');
+                detailData2.push([
+                    index + 1,
+                    names,
+                    savedData.g2[index] || 0
+                ]);
+            });
+
+            const ws3 = XLSX.utils.aoa_to_sheet(detailData2);
+            ws3['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 15 }];
+            XLSX.utils.book_append_sheet(wb, ws3, 'Chi tiết Kiểm ngược');
+
+            // Xuất file
+            const fileName = `Ket_qua_bau_cu_${new Date().toISOString().slice(0,10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            alert('Đã xuất file Excel thành công!');
         }
     </script>
 </body>
