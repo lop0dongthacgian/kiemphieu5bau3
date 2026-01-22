@@ -1,135 +1,143 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ - Kiểm phiếu bầu cử 5 bầu 3</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { font-size: clamp(20px, 5vw, 32px); color: #1E29FF; text-align: center; text-transform: uppercase; }
-        h2 { color: #2c3e50; border-left: 1px solid #1E29FF; border-right: 1px solid #1E29FF; padding-left: 10px; margin-top: 30px; text-align: center;}
-        .candidate-list { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f2f2f2; color: #2c3e50; }
-        .invalid { color: #d32f2f; font-weight: bold; background-color: #fff5f5; }
-        .valid { color: #2e7d32; font-weight: bold; background-color: #f1f8e9; }
-        .nav-box { text-align: center; margin: 40px 0; }
-        button.btn-start { padding: 15px 40px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        button.btn-start:hover { background-color: #45a049; transform: translateY(-2px); }
-        .note { font-style: italic; color: #666; font-size: 0.9em; }
-        #detail-table + .note {
-    color: red;
-    font-size: 18px;
-    font-weight: 600;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trang chủ - Kiểm phiếu bầu cử 5 bầu 3</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; color: #333; }
+.container { max-width: 900px; margin: 0 auto; }
+h1 { font-size: clamp(20px, 5vw, 32px); color: #1E29FF; text-align: center; text-transform: uppercase; }
+h2 { color: #2c3e50; border-left: 1px solid #1E29FF; border-right: 1px solid #1E29FF; padding-left: 10px; margin-top: 30px; text-align: center;}
+.candidate-list { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
+table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+th { background-color: #f2f2f2; color: #2c3e50; }
+.invalid { color: #d32f2f; font-weight: bold; background-color: #fff5f5; }
+.valid { color: #2e7d32; font-weight: bold; background-color: #f1f8e9; }
+.nav-box { text-align: center; margin: 40px 0; }
+button.btn-start { padding: 15px 40px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+button.btn-start:hover { background-color: #45a049; transform: translateY(-2px); }
+.note { font-style: italic; color: #666; font-size: 0.9em; }
+#detail-table + .note { color: red; font-size: 18px; font-weight: 600; }
+@media (max-width: 600px) { 
+  #detail-table + .note { font-size: 16px; }
 }
-@media (max-width: 600px) {
-    #detail-table + .note {
-        font-size: 16px;
-    }
-}
-    </style>
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>HƯỚNG DẪN KIỂM PHIẾU BẦU CỬ <br> (CƠ CẤU: 5 BẦU 3)</h1>
-        
-        <div class="candidate-list">
-            <h2>Danh sách ứng cử viên</h2>
-            <ol id="main-candidate-list" style="font-weight: bold; font-size: 1.1em;"></ol>
-            <p class="note">* Đây là ví dụ, thay khi có công bố</p>
-        </div>
+<div class="container">
+<h1>HƯỚNG DẪN KIỂM PHIẾU BẦU CỬ <br> (CƠ CẤU: 5 BẦU 3)</h1>
 
-        <h2>Phân loại phiếu <br> theo các trường hợp sau đây</h2>
-        <p class="note">* Các trường hợp này số ít, phân loại phiếu bất hợp lệ và kiểm riêng
-      phiếu được bầu cho từng ứng viên theo cách cũ (gạch thành ô – 5 gạch chéo)</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Trường hợp gạch</th>
-                    <th>Số lượng bầu</th>
-                    <th>Trạng thái</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="invalid"><td>Không gạch ai (để trống)</td><td>0</td><td>Bất hợp lệ</td></tr>
-                <tr class="invalid"><td>Gạch 1 người</td><td>4</td><td>Bất hợp lệ</td></tr>
-                <tr class="valid"><td>Gạch 2 người<br><span style="font-weight: normal; font-style: italic; color:#1E29FF;">(Trường hợp phổ biến, phân chi tiết phía dưới) </span></td><td>3</td><td>Hợp lệ</td></tr>
-                <tr class="valid"><td>Gạch 3 người</td><td>2</td><td>Hợp lệ</td></tr>
-                <tr class="valid"><td>Gạch 4 người</td><td>1</td><td>Hợp lệ</td></tr>
-                <tr class="invalid"><td>Gạch cả 5 người</td><td>0</td><td>Bất hợp lệ</td></tr>
-            </tbody>
-        </table>
+<div class="candidate-list">
+  <h2>Danh sách ứng cử viên</h2>
+  <ol id="main-candidate-list" style="font-weight: bold; font-size: 1.1em;"></ol>
+  <p class="note">* Đây là ví dụ, thay khi có công bố</p>
+</div>
 
-        <h2>Phân chi tiết <br> trường hợp gạch 2 bầu 3</h2>
-        <p class="note">* Đây là trường hợp phổ biến nhất phân riêng theo nhóm, sau khi kiểm mỗi nhóm kẹp theo lốc 100 cho dễ đếm tổng</p>
-        <table id="detail-table">
-            <thead>
-                <tr>
-                    <th>STT</th>
-                    <th>Ứng viên bị gạch</th>
-                    <th>Ứng viên được bầu</th>
-                    <th>Kết quả</th>
-                </tr>
-            </thead>
-            <tbody id="detail-body">
-                </tbody>
-        </table>
-          <p class="note"><u>Ghi chú:</u>  Có thể in các bảng tên từng loại: Dùng hộp hoặc phân vùng để bỏ vào khi kiểm, đếm.</p>
-        <div class="nav-box">
-            <button class="btn-start" onclick="location.href='check-votes.html'">BẮT ĐẦU NHẬP PHIẾU KIỂM</button>
-        </div>
-    </div>
+<h2>Phân loại phiếu bầu thành 14 nhóm như sau:</h2>
 
-    <script src="config.js"></script>
-    <script>
-        // 1. Đổ danh sách ứng viên
-        const listContainer = document.getElementById('main-candidate-list');
-        candidateKeys.forEach(key => {
-            const li = document.createElement('li');
-            li.textContent = candidates[key];
-            listContainer.appendChild(li);
-        });
+<h3>1. Phiếu bất hợp lệ (5 loại)</h3>
+<p class="note">Là những phiếu sau:</p>
+<table>
+  <thead>
+    <tr>
+      <th>STT</th>
+      <th>Loại phiếu</th>
+      <th>Trạng thái</th>
+    </tr>
+  </thead>
+  <tbody>    <tr class="invalid"><td>1</td><td>Không có dấu của tổ bầu cử</td><td>Bất hợp lệ</td></tr>
+    <tr class="invalid"><td>2</td><td>Ghi thêm vào phiếu</td><td>Bất hợp lệ</td></tr>
+    <tr class="invalid"><td>3</td><td>Gạch không đúng dòng họ và tên</td><td>Bất hợp lệ</td></tr>
+    <tr class="invalid"><td>4</td><td>Phiếu để trống</td><td>Bất hợp lệ</td></tr>
+    <tr class="invalid"><td>5</td><td>Gạch hết 5 người hoặc chỉ gạch 1 người</td><td>Bất hợp lệ</td></tr>
+  </tbody>
+</table>
 
-        // 2. Tự động tạo bảng chi tiết các trường hợp gạch 2 bầu 3
-        const detailBody = document.getElementById('detail-body');
-        
-        // Danh sách các cặp gạch (tổ hợp 2 của 5)
-        const combinations = [
-            ['A', 'B'], ['A', 'C'], ['A', 'D'], ['A', 'E'],
-            ['B', 'C'], ['B', 'D'], ['B', 'E'],
-            ['C', 'D'], ['C', 'E'],
-            ['D', 'E']
-        ];
+<h3>2. Phiếu hợp lệ (3 nhóm chính)</h3>
+<p class="note">Gồm các loại sau:</p>
+<table>
+  <thead>
+    <tr>
+      <th>Loại phiếu</th>
+      <th>Số người bị gạch</th>
+      <th>Số người được bầu</th>
+      <th>Trạng thái</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="valid"><td>Phiếu bầu 1</td><td>4</td><td>1</td><td>Hợp lệ</td></tr>
+    <tr class="valid"><td>Phiếu bầu 2</td><td>3</td><td>2</td><td>Hợp lệ</td></tr>
+    <tr class="valid"><td>Phiếu bầu đủ 3<br><span style="font-weight: normal; font-style: italic; color:#1E29FF;">(Trường hợp phổ biến, phân chi tiết phía dưới)</span></td><td>2</td><td>3</td><td>Hợp lệ</td></tr>
+  </tbody>
+</table>
 
-        combinations.forEach((pair, index) => {
-            const row = document.createElement('tr');
-            row.className = 'valid';
+<h2>Phân chi tiết trường hợp “Phiếu bầu đủ 3” (gạch 2 người)</h2>
+<p class="note">* Đây là trường hợp phổ biến nhất – phân riêng theo từng cặp bị gạch.<br>
+Sau khi kiểm, kẹp theo lốc 100 cho dễ đếm tổng.</p>
 
-            // Cột 1: STT
-            const td1 = document.createElement('td');
-            td1.textContent = index + 1;
+<table id="detail-table">
+  <thead>
+    <tr>
+      <th>STT</th>
+      <th>Ứng viên bị gạch</th>
+      <th>Ứng viên được bầu</th>
+      <th>Kết quả</th>
+    </tr>
+  </thead>
+  <tbody id="detail-body">
+  </tbody>
+</table>
 
-            // Cột 2: Bị gạch
-            const td2 = document.createElement('td');
-            td2.textContent = pair.map(k => candidates[k]).join(', ');
+<p class="note"><u>Ghi chú:</u> Có thể in các bảng tên từng loại: Dùng hộp hoặc phân vùng để bỏ vào khi kiểm, đếm.</p>
 
-            // Cột 3: Được bầu (Những người không nằm trong cặp bị gạch)
-            const td3 = document.createElement('td');
-            const elected = candidateKeys.filter(k => !pair.includes(k));
-            td3.textContent = elected.map(k => candidates[k]).join(', ');
+<div class="nav-box">
+  <button class="btn-start" onclick="location.href='check-votes.html'">BẮT ĐẦU NHẬP PHIẾU KIỂM</button>
+</div>
 
-            // Cột 4: Kết quả
-            const td4 = document.createElement('td');
-            td4.textContent = 'Phiếu hợp lệ';
+</div>
+<script src="config.js"></script>
+<script>
+// 1. Đổ danh sách ứng viên
+const listContainer = document.getElementById('main-candidate-list');
+candidateKeys.forEach(key => {
+  const li = document.createElement('li');
+  li.textContent = candidates[key];
+  listContainer.appendChild(li);
+});
 
-            row.appendChild(td1);
-            row.appendChild(td2);
-            row.appendChild(td3);
-            row.appendChild(td4);
-            detailBody.appendChild(row);
-        });
-    </script>
+// 2. Tự động tạo bảng chi tiết các trường hợp gạch 2 bầu 3
+const detailBody = document.getElementById('detail-body');
+// Danh sách các cặp gạch (tổ hợp 2 của 5)
+const combinations = [
+  ['A', 'B'], ['A', 'C'], ['A', 'D'], ['A', 'E'],
+  ['B', 'C'], ['B', 'D'], ['B', 'E'],
+  ['C', 'D'], ['C', 'E'],
+  ['D', 'E']
+];
+combinations.forEach((pair, index) => {
+  const row = document.createElement('tr');
+  row.className = 'valid';
+  // Cột 1: STT
+  const td1 = document.createElement('td');
+  td1.textContent = index + 1;
+  // Cột 2: Bị gạch
+  const td2 = document.createElement('td');
+  td2.textContent = pair.map(k => candidates[k]).join(', ');
+  // Cột 3: Được bầu (Những người không nằm trong cặp bị gạch)
+  const td3 = document.createElement('td');
+  const elected = candidateKeys.filter(k => !pair.includes(k));
+  td3.textContent = elected.map(k => candidates[k]).join(', ');
+  // Cột 4: Kết quả
+  const td4 = document.createElement('td');
+  td4.textContent = 'Phiếu hợp lệ';
+  row.appendChild(td1);
+  row.appendChild(td2);
+  row.appendChild(td3);
+  row.appendChild(td4);
+  detailBody.appendChild(row);
+});
+</script>
 </body>
 </html>
