@@ -19,14 +19,10 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: space-around; 
+    justify-content: space-between; 
     page-break-after: always;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     position: relative;
-  }
-  .page-table {
-    justify-content: center !important;
-    align-items: center;
   }
   .vote-group {
     text-align: center;
@@ -40,9 +36,12 @@
   .vote-group:last-child {
     border-bottom: none;
   }
-  
+
   .table-container {
     width: 100%;
+    height: calc(100% - 60px); /* Adjust height to fill available space */
+    display: flex;
+    flex-direction: column;
   }
   .table-title {
     text-align: center;
@@ -55,9 +54,10 @@
     width: 100%;
     border-collapse: collapse;
     margin: 0 auto;
+    flex: 1; /* Make the table grow to fill the available space */
   }
   th, td {
-    border: 1.5pt solid black;
+    border: 1pt solid black; /* Changed border thickness */
     padding: 12px 8px;
     text-align: center;
     font-size: 14pt;
