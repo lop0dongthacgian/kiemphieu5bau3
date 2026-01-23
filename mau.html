@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Bảng ghi nhóm phiếu bầu cử</title>
+<style>
+  body {
+    font-family: "Times New Roman", Times, serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    margin: 10mm auto;
+    padding: 20mm 15mm;
+    background: white;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around; /* Canh đều khoảng cách giữa các nhóm chữ */
+    page-break-after: always;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .vote-group {
+    text-align: center;
+    font-size: 34pt; /* Chữ to rõ ràng */
+    font-weight: bold;
+    padding-bottom: 10mm;
+    border-bottom: 1pt dashed #ddd; /* Đường kẻ mờ để dễ cắt */
+    width: 100%;
+    color: black;
+  }
+  .vote-group:last-child {
+    border-bottom: none;
+  }
+  .footer-note {
+    text-align: center;
+    font-style: italic;
+    font-size: 12pt;
+    color: #999;
+    margin-top: 10mm;
+  }
+  .btn-container {
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  .download-btn {
+    padding: 15px 40px;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .back-btn {
+    padding: 15px 30px;
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  @media print {
+    .btn-container { display: none; }
+    body { background: none; }
+    .page { margin: 0; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="btn-container">
+  <button class="download-btn" onclick="confirmDownload()">TẢI XUỐNG FILE WORD</button>
+  <button class="back-btn" onclick="goBackToIndex()">← Quay về trang chủ</button>
+</div>
+
+<div id="print-area">
+  <div class="page">
+    <div class="vote-group">PHIẾU BẤT HỢP LỆ</div>
+    <div class="vote-group">PHIẾU BẦU 1</div>
+    <div class="vote-group">PHIẾU BẦU 2</div>
+    <div id="ab-box" class="vote-group">GẠCH A và B</div>
+    <div class="footer-note">Trang 1/4</div>
+  </div>
+
+  <div class="page">
+    <div id="ac-box" class="vote-group">GẠCH A và C</div>
+    <div id="ad-box" class="vote-group">GẠCH A và D</div>
+    <div id="ae-box" class="vote-group">GẠCH A và E</div>
+    <div id="bc-box" class="vote-group">GẠCH B và C</div>
+    <div class="footer-note">Trang 2/4</div>
+  </div>
+
+  <div class="page">
+    <div id="bd-box" class="vote-group">GẠCH B và D</div>
+    <div id="be-box" class="vote-group">GẠCH B và E</div>
+    <div id="cd-box" class="vote-group">GẠCH C và D</div>
+    <div id="ce-box" class="vote-group">GẠCH C và E</div>
+    <div class="footer-note">Trang 3/4</div>
+  </div>
+
+  <div class="page">
+    <div id="de-box" class="vote-group">GẠCH D và E</div>
+    <div class="vote-group"></div>
+    <div class="vote-group"></div>
+    <div class="vote-group"></div>
+    <div class="footer-note">Trang 4/4</div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+// Hàm quay về trang chủ
+function goBackToIndex() {
+  if (confirm("Bạn có muốn quay về trang chủ không?")) {
+    window.location.href = "index.html";
+  }
+}
+
+function updateCandidateNames() {
+  if (typeof candidates === 'undefined') {
+    console.log("Không tìm thấy config.js hoặc biến candidates");
+    return;
+  }
+  const pairs = [
+    { id: 'ab-box', keys: ['A', 'B'] }, { id: 'ac-box', keys: ['A', 'C'] },
+    { id: 'ad-box', keys: ['A', 'D'] }, { id: 'ae-box', keys: ['A', 'E'] },
+    { id: 'bc-box', keys: ['B', 'C'] }, { id: 'bd-box', keys: ['B', 'D'] },
+    { id: 'be-box', keys: ['B', 'E'] }, { id: 'cd-box', keys: ['C', 'D'] },
+    { id: 'ce-box', keys: ['C', 'E'] }, { id: 'de-box', keys: ['D', 'E'] }
+  ];
+  pairs.forEach(pair => {
+    const el = document.getElementById(pair.id);
+    if (el) {
+      const name1 = candidates[pair.keys[0]] || pair.keys[0];
+      const name2 = candidates[pair.keys[1]] || pair.keys[1];
+      el.textContent = `GẠCH ${name1} và ${name2}`;
+    }
+  });
+}
+
+function confirmDownload() {
+  if (confirm("Bạn có muốn tải mẫu phiếu bầu dưới dạng Word không?")) {
+    downloadWord();
+  }
+}
+
+function downloadWord() {
+  updateCandidateNames();
+  const content = document.getElementById('print-area').innerHTML;
+  const style = `
+    <style>
+      @page { size: A4; margin: 1cm; }
+      .vote-group { text-align: center; font-size: 30pt; font-weight: bold; padding: 50pt 0; border-bottom: 1pt dashed #cccccc; display: block; width: 100%; font-family: "Times New Roman"; }
+      .page { page-break-after: always; clear: both; }
+      .footer-note { text-align: center; font-size: 10pt; margin-top: 20pt; color: #999; }
+    </style>`;
+  const html = `<html><head><meta charset='utf-8'>${style}</head><body>${content}</body></html>`;
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; 
+  a.download = 'Mau_Phieu_Bau_Cu_5_Bau_3.doc';
+  document.body.appendChild(a); 
+  a.click(); 
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  // Hiển thị thông báo và quay về trang chủ
+  setTimeout(() => {
+    if (confirm("Tải tệp Word thành công! Bạn có muốn quay về trang chủ không?")) {
+      window.location.href = "index.html";
+    }
+  }, 500);
+}
+
+// Cập nhật tên ứng viên khi trang tải xong
+window.onload = updateCandidateNames;
+
+// Thêm sự kiện khi người dùng nhấn nút quay lại trình duyệt
+window.addEventListener('beforeunload', function() {
+  // Không cần làm gì đặc biệt
+});
+</script>
+</body>
+</html>
