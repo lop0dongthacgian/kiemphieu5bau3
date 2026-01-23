@@ -24,10 +24,9 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     position: relative;
   }
-  /* Style cho các bảng mẫu */
   .page-table {
-    justify-content: center !important; /* Căn giữa bảng theo chiều dọc */
-    align-items: center; /* Căn giữa theo chiều ngang */
+    justify-content: center !important;
+    align-items: center;
   }
   .vote-group {
     text-align: center;
@@ -42,7 +41,6 @@
     border-bottom: none;
   }
   
-  /* CSS cho Bảng */
   .table-container {
     width: 100%;
   }
@@ -100,6 +98,10 @@
     font-weight: bold;
     cursor: pointer;
   }
+  .download-btn:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+  }
   .back-btn {
     padding: 15px 30px;
     background: #f0f0f0;
@@ -116,11 +118,13 @@
     .page { margin: 0; box-shadow: none; }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
 <div class="btn-container">
-  <button class="download-btn" onclick="confirmDownload()">TẢI XUỐNG FILE WORD</button>
+  <button class="download-btn" id="downloadBtn" onclick="confirmDownload()">TẢI XUỐNG FILE PDF</button>
   <button class="back-btn" onclick="goBackToIndex()">← Quay về trang chủ</button>
 </div>
 
@@ -192,6 +196,16 @@
   </div>
 </div>
 
+<script>
+// Dữ liệu ứng cử viên mẫu (sẽ được ghi đè bởi config.js nếu có)
+var candidates = {
+  'A': 'Nguyễn Văn A',
+  'B': 'Trần Thị B',
+  'C': 'Lê Văn C',
+  'D': 'Phạm Thị D',
+  'E': 'Hoàng Văn E'
+};
+</script>
 <script src="config.js"></script>
 <script>
 function goBackToIndex() {
@@ -240,34 +254,50 @@ function updateCandidateNames() {
 }
 
 function confirmDownload() {
-  if (confirm("Bạn có muốn tải mẫu phiếu bầu dưới dạng Word không?")) {
-    downloadWord();
+  if (confirm("Bạn có muốn tải mẫu để in dưới dạng PDF không?")) {
+    downloadPDF();
   }
 }
 
-function downloadWord() {
+async function downloadPDF() {
+  const btn = document.getElementById('downloadBtn');
+  btn.disabled = true;
+  btn.textContent = 'ĐANG TẠO PDF...';
+  
   updateCandidateNames();
-  const content = document.getElementById('print-area').innerHTML;
-  const style = `
-    <style>
-      @page { size: A4; margin: 1cm; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { border: 1pt solid black; padding: 10px; text-align: center; font-family: "Times New Roman"; }
-      .table-title { font-weight: bold; font-size: 16pt; text-align: center; margin-bottom: 15pt; }
-      .vote-group { text-align: center; font-size: 28pt; font-weight: bold; padding: 40pt 0; border-bottom: 1pt dashed #ccc; display: block; width: 100%; }
-      .page { page-break-after: always; clear: both; }
-      .footer-note { text-align: center; font-size: 10pt; margin-top: 20pt; color: #999; }
-    </style>`;
-  const html = `<html><head><meta charset='utf-8'>${style}</head><body>${content}</body></html>`;
-  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; 
-  a.download = 'Mau_in.doc';
-  document.body.appendChild(a); 
-  a.click(); 
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pages = document.querySelectorAll('.page');
+    
+    for (let i = 0; i < pages.length; i++) {
+      const canvas = await html2canvas(pages[i], {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      if (i > 0) {
+        pdf.addPage();
+      }
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    }
+    
+    pdf.save('Mau_In.pdf');
+    
+  } catch (error) {
+    alert('Có lỗi xảy ra khi tạo PDF: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'TẢI XUỐNG FILE PDF';
+  }
 }
 
 window.onload = updateCandidateNames;
