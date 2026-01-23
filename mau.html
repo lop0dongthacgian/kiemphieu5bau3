@@ -4,209 +4,189 @@
 <meta charset="UTF-8">
 <title>Bảng ghi nhóm phiếu bầu cử</title>
 <style>
-  body {
-    font-family: "Times New Roman", Times, serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f2f5;
-  }
-  .page {
-    width: 210mm;
-    height: 297mm;
-    margin: 10mm auto;
-    padding: 20mm 15mm;
-    background: white;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; 
-    page-break-after: always;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    position: relative;
-  }
-  .vote-group {
-    text-align: center;
-    font-size: 34pt;
-    font-weight: bold;
-    padding-bottom: 10mm;
-    border-bottom: 1pt dashed #ddd;
-    width: 100%;
-    color: black;
-  }
-  .vote-group:last-child {
-    border-bottom: none;
-  }
-
-  .table-container {
-    width: 100%;
-    height: calc(100% - 60px); /* Adjust height to fill available space */
-    display: flex;
-    flex-direction: column;
-  }
-  .table-title {
-    text-align: center;
-    font-weight: bold;
-    font-size: 18pt;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0 auto;
-    flex: 1; /* Make the table grow to fill the available space */
-  }
-  th, td {
-    border: 1pt solid black; /* Changed border thickness */
-    padding: 12px 8px;
-    text-align: center;
-    font-size: 14pt;
-  }
-  th {
-    background-color: #f2f2f2;
-  }
-
-  .footer-note {
-    position: absolute;
-    bottom: 10mm;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-style: italic;
-    font-size: 12pt;
-    color: #999;
-  }
-  .btn-container {
-    text-align: center;
-    padding: 20px;
-    background: #fff;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-  .download-btn {
-    padding: 15px 40px;
-    background-color: #d32f2f;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .download-btn:disabled {
-    background-color: #999;
-    cursor: not-allowed;
-  }
-  .back-btn {
-    padding: 15px 30px;
-    background: #f0f0f0;
-    color: #333;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  @media print {
-    .btn-container { display: none; }
-    body { background: none; }
-    .page { margin: 0; box-shadow: none; }
-  }
+body {
+font-family: "Times New Roman", Times, serif;
+margin: 0;
+padding: 0;
+background-color: #f0f2f5;
+}
+.page {
+width: 210mm;
+height: 297mm;
+margin: 10mm auto;
+padding: 20mm 15mm;
+background: white;
+box-sizing: border-box;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+page-break-after: always;
+box-shadow: 0 0 10px rgba(0,0,0,0.1);
+position: relative;
+}
+.vote-group {
+text-align: center;
+font-size: 34pt;
+font-weight: bold;
+padding-bottom: 10mm;
+border-bottom: 1pt dashed #ddd;
+width: 100%;
+color: black;
+line-height: 1.4;
+}
+.vote-group:last-child {
+border-bottom: none;
+}
+.table-container {
+width: 100%;
+height: calc(100% - 60px);
+display: flex;
+flex-direction: column;
+}
+.table-title {
+text-align: center;
+font-weight: bold;
+font-size: 18pt;
+margin-bottom: 20px;text-transform: uppercase;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+margin: 0 auto;
+flex: 1;
+}
+th, td {
+border: 1pt solid black;
+padding: 12px 8px;
+text-align: center;
+font-size: 14pt;
+}
+th {
+background-color: #f2f2f2;
+}
+.footer-note {
+position: absolute;
+bottom: 10mm;
+left: 0;
+right: 0;
+text-align: center;
+font-style: italic;
+font-size: 12pt;
+color: #999;
+}
+.btn-container {
+text-align: center;
+padding: 20px;
+background: #fff;
+position: sticky;
+top: 0;
+z-index: 100;
+border-bottom: 1px solid #ddd;
+display: flex;
+justify-content: center;
+gap: 20px;
+}
+.download-btn {
+padding: 15px 40px;
+background-color: #d32f2f;
+color: white;
+border: none;
+border-radius: 4px;
+font-size: 18px;
+font-weight: bold;
+cursor: pointer;
+}
+.download-btn:disabled {background-color: #999;
+cursor: not-allowed;
+}
+.back-btn {
+padding: 15px 30px;
+background: #f0f0f0;
+color: #333;
+border: 1px solid #ccc;
+border-radius: 4px;
+font-size: 16px;
+cursor: pointer;
+font-weight: bold;
+}
+@media print {
+.btn-container { display: none; }
+body { background: none; }
+.page { margin: 0; box-shadow: none; }
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-
 <div class="btn-container">
-  <button class="download-btn" id="downloadBtn" onclick="confirmDownload()">TẢI XUỐNG FILE PDF</button>
-  <button class="back-btn" onclick="goBackToIndex()">← Quay về trang chủ</button>
+<button class="download-btn" id="downloadBtn" onclick="confirmDownload()">TẢI XUỐNG FILE PDF</button>
+<button class="back-btn" onclick="goBackToIndex()">← Quay về trang chủ</button>
 </div>
-
 <div id="print-area">
-  <div class="page">
-    <div class="vote-group">PHIẾU BẤT HỢP LỆ</div>
-    <div class="vote-group">PHIẾU BẦU 1</div>
-    <div class="vote-group">PHIẾU BẦU 2</div>
-    <div id="ab-box" class="vote-group">GẠCH A và B</div>
-    <div class="footer-note">Trang 1/6</div>
-  </div>
-
-  <div class="page">
-    <div id="ac-box" class="vote-group">GẠCH A và C</div>
-    <div id="ad-box" class="vote-group">GẠCH A và D</div>
-    <div id="ae-box" class="vote-group">GẠCH A và E</div>
-    <div id="bc-box" class="vote-group">GẠCH B và C</div>
-    <div class="footer-note">Trang 2/6</div>
-  </div>
-
-  <div class="page">
-    <div id="bd-box" class="vote-group">GẠCH B và D</div>
-    <div id="be-box" class="vote-group">GẠCH B và E</div>
-    <div id="cd-box" class="vote-group">GẠCH C và D</div>
-    <div id="ce-box" class="vote-group">GẠCH C và E</div>
-    <div class="footer-note">Trang 3/6</div>
-  </div>
-
-  <div class="page">
-    <div id="de-box" class="vote-group">GẠCH D và E</div>
-    <div class="vote-group"></div>
-    <div class="vote-group"></div>
-    <div class="vote-group"></div>
-    <div class="footer-note">Trang 4/6</div>
-  </div>
-
-  <div class="page page-table">
-    <div class="table-container">
-        <div class="table-title">PHỤ LỤC 1: BẢNG KIỂM PHIẾU ĐƯỢC BẦU (KIỂM XUÔI)</div>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 10%;">STT</th>
-                    <th style="width: 50%;">Họ và tên ứng cử viên</th>
-                    <th style="width: 40%;">Số phiếu được bầu</th>
-                </tr>
-            </thead>
-            <tbody id="table-bau-body"></tbody>
-        </table>
-    </div>
-    <div class="footer-note">Trang 5/6</div>
-  </div>
-
-  <div class="page page-table">
-    <div class="table-container">
-        <div class="table-title">PHỤ LỤC 2: BẢNG KIỂM PHIẾU BỊ GẠCH (KIỂM NGƯỢC)</div>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 10%;">STT</th>
-                    <th style="width: 50%;">Cặp ứng viên bị gạch</th>
-                    <th style="width: 40%;">Số phiếu</th>
-                </tr>
-            </thead>
-            <tbody id="table-gach-body"></tbody>
-        </table>
-    </div>
-    <div class="footer-note">Trang 6/6</div>
-  </div>
+<div class="page">
+<div class="vote-group">PHIẾU BẤT HỢP LỆ</div>
+<div class="vote-group">PHIẾU BẦU 1</div>
+<div class="vote-group">PHIẾU BẦU 2</div>
+<div id="ab-box" class="vote-group"></div>
+<div class="footer-note">Trang 1/6</div>
+</div>
+<div class="page">
+<div id="ac-box" class="vote-group"></div>
+<div id="ad-box" class="vote-group"></div>
+<div id="ae-box" class="vote-group"></div>
+<div id="bc-box" class="vote-group"></div>
+<div class="footer-note">Trang 2/6</div>
+</div>
+<div class="page">
+<div id="bd-box" class="vote-group"></div>
+<div id="be-box" class="vote-group"></div>
+<div id="cd-box" class="vote-group"></div>
+<div id="ce-box" class="vote-group"></div>
+<div class="footer-note">Trang 3/6</div>
+</div>
+<div class="page"><div id="de-box" class="vote-group"></div>
+<div class="vote-group"></div>
+<div class="vote-group"></div>
+<div class="vote-group"></div>
+<div class="footer-note">Trang 4/6</div>
+</div>
+<div class="page page-table">
+<div class="table-container">
+<div class="table-title">PHỤ LỤC 1: BẢNG KIỂM PHIẾU ĐƯỢC BẦU (KIỂM XUÔI)</div>
+<table>
+<thead>
+<tr>
+<th style="width: 10%;">STT</th>
+<th style="width: 50%;">Họ và tên ứng cử viên</th>
+<th style="width: 40%;">Số phiếu được bầu</th>
+</tr>
+</thead>
+<tbody id="table-bau-body"></tbody>
+</table>
+</div>
+<div class="footer-note">Trang 5/6</div>
+</div>
+<div class="page page-table">
+<div class="table-container">
+<div class="table-title">PHỤ LỤC 2: BẢNG KIỂM PHIẾU BỊ GẠCH (KIỂM NGƯỢC)</div>
+<table>
+<thead>
+<tr>
+<th style="width: 10%;">STT</th>
+<th style="width: 50%;">Cặp ứng viên bị gạch</th>
+<th style="width: 40%;">Số phiếu</th>
+</tr>
+</thead>
+<tbody id="table-gach-body"></tbody>
+</table>
+</div>
+<div class="footer-note">Trang 6/6</div>
+</div>
 </div>
 
-<script>
-// Dữ liệu ứng cử viên mẫu (sẽ được ghi đè bởi config.js nếu có)
-var candidates = {
-  'A': 'Nguyễn Văn A',
-  'B': 'Trần Thị B',
-  'C': 'Lê Văn C',
-  'D': 'Phạm Thị D',
-  'E': 'Hoàng Văn E'
-};
-</script>
 <script src="config.js"></script>
+
 <script>
 function goBackToIndex() {
   if (confirm("Bạn có muốn quay về trang chủ không?")) {
@@ -225,11 +205,13 @@ function updateCandidateNames() {
     { id: 'ce-box', keys: ['C', 'E'] }, { id: 'de-box', keys: ['D', 'E'] }
   ];
 
-  // Cập nhật nhãn trang 1-4
+  // Cập nhật trang 1–4: HIỂN THỊ 2 TÊN TRÊN 2 DÒNG, KHÔNG CÓ CHỮ "GẠCH"
   pairs.forEach(pair => {
     const el = document.getElementById(pair.id);
     if (el) {
-      el.textContent = `GẠCH ${candidates[pair.keys[0]]} và ${candidates[pair.keys[1]]}`;
+      const name1 = candidates[pair.keys[0]] || '';
+      const name2 = candidates[pair.keys[1]] || '';
+      el.innerHTML = `${name1}<br>${name2}`;
     }
   });
 
@@ -242,7 +224,7 @@ function updateCandidateNames() {
     });
   }
 
-  // Cập nhật Bảng Trang 6 (Kiểm ngược)
+  // Cập nhật Bảng Trang 6 (Kiểm ngược) – vẫn giữ "Gạch" ở đây vì là mô tả
   const gachBody = document.getElementById('table-gach-body');
   if (gachBody) {
     gachBody.innerHTML = '';
@@ -252,7 +234,6 @@ function updateCandidateNames() {
     });
   }
 }
-
 function confirmDownload() {
   if (confirm("Bạn có muốn tải mẫu để in dưới dạng PDF không?")) {
     downloadPDF();
@@ -263,14 +244,11 @@ async function downloadPDF() {
   const btn = document.getElementById('downloadBtn');
   btn.disabled = true;
   btn.textContent = 'ĐANG TẠO PDF...';
-  
   updateCandidateNames();
-  
   try {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pages = document.querySelectorAll('.page');
-    
     for (let i = 0; i < pages.length; i++) {
       const canvas = await html2canvas(pages[i], {
         scale: 2,
@@ -278,20 +256,18 @@ async function downloadPDF() {
         logging: false,
         backgroundColor: '#ffffff'
       });
-      
       const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 210; // A4 width in mm
+      const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      if (i > 0) {
-        pdf.addPage();
-      }
-      
+      if (i > 0) pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
     }
-    
     pdf.save('Mau_In.pdf');
-    
+
+// Tự quay về trang chủ sau khi tải xong
+setTimeout(() => {
+  window.location.href = "index.html";
+}, 500);
   } catch (error) {
     alert('Có lỗi xảy ra khi tạo PDF: ' + error.message);
   } finally {
