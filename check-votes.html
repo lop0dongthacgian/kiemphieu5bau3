@@ -7,9 +7,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; background-color: #f0f2f5; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         h1 { color: #1E29FF; text-align: center; }
         h2 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 5px; text-align: center; }
+        h3 { color: #1a237e; margin-top: 20px; padding: 10px; background-color: #e3f2fd; border-radius: 5px; }
         table { width: 100%; border-collapse: collapse; margin: 15px 0; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
         th { background-color: #f8f9fa; }
@@ -28,20 +29,23 @@
         .export-btn { background-color: #28a745; margin-top: 20px; padding: 15px 30px; font-size: 16px; }
         .export-btn:hover { background-color: #218838; }
         .export-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .section-counter { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .counter-box { background: #f5f5f5; padding: 10px 15px; border-radius: 5px; font-weight: bold; color: #333; }
+        .total-box { background: #e8f5e9; padding: 10px; border-radius: 5px; margin-top: 10px; text-align: center; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>MÁY TÍNH KIỂM PHIẾU BẦU CỬ</h1>
+        <h1>MÁY TÍNH KIỂM PHIẾU BẦU CỬ (5 BẦU 3)</h1>
         
         <div class="vote-table">
-            <h2>Thông tin chung</h2>
+            <h2>THÔNG TIN CHUNG</h2>
             <table>
                 <tr>
                     <td><strong>Tổng số cử tri của đơn vị bầu cử:</strong></td>
-                    <td><input type="number" id="totalVotersUnit" value="0" oninput="onInputChange('general')"></td>
+                    <td><input type="number" id="totalVotersUnit" value="" oninput="onInputChange('general')"></td>
                     <td><strong>Số cử tri đã tham gia bỏ phiếu:</strong></td>
-                    <td><input type="number" id="actualVoters" value="0" oninput="updateCalculations(); onInputChange('general')"></td>
+                    <td><input type="number" id="actualVoters" value="" oninput="updateCalculations(); onInputChange('general')"></td>
                 </tr>
                 <tr>
                     <td colspan="3"><strong>Tỷ lệ cử tri tham gia:</strong></td>
@@ -49,13 +53,13 @@
                 </tr>
                 <tr>
                     <td><strong>Số phiếu phát ra:</strong></td>
-                    <td><input type="number" id="issuedBallots" value="0" oninput="onInputChange('general')"></td>
+                    <td><input type="number" id="issuedBallots" value="" oninput="onInputChange('general')"></td>
                     <td><strong>Số phiếu thu vào:</strong></td>
-                    <td><input type="number" id="collectedBallots" value="0" oninput="updateCalculations(); onInputChange('general')"></td>
+                    <td><input type="number" id="collectedBallots" value="" oninput="updateCalculations(); onInputChange('general')"></td>
                 </tr>
                 <tr>
                     <td><strong>Số phiếu không hợp lệ:</strong></td>
-                    <td><input type="number" id="invalidVotes" value="0" oninput="updateCalculations(); onInputChange('general')"></td>
+                    <td><input type="number" id="invalidVotes" value="" oninput="updateCalculations(); onInputChange('general')"></td>
                     <td><strong>Số phiếu hợp lệ:</strong></td>
                     <td><strong id="validVotesCalc" style="color: green; font-size: 1.2em;">0</strong></td>
                 </tr>
@@ -73,50 +77,111 @@
             </div>
         </div>
 
+        <!-- PHẦN 1: BẦU 1 (Gạch 4) -->
         <div class="vote-table">
-            <h2>1. KIỂM XUÔI: Gạch 4 (Bầu 1) và Gạch 3 (Bầu 2)</h2>
-            <div class="check-type">Nhập số phiếu ĐƯỢC BẦU cho từng người (tổng cộng cả 2 loại phiếu)</div>
+            <div class="section-counter">
+                <h3>PHIẾU BẦU 1 NGƯỜI (GẠCH 4)</h3>
+                <div class="counter-box">
+                    Số phiếu loại này: <input type="number" id="ballotType1Count" value="" style="width: 80px; margin-left: 10px;" oninput="updateType1Total(); onInputChange('type1')">
+                </div>
+            </div>
+            <div class="check-type">Nhập số phiếu ĐƯỢC BẦU cho từng người (mỗi phiếu chỉ bầu 1 người)</div>
             <table class="combined-table">
                 <thead>
                     <tr>
                         <th>STT</th>
                         <th>Người được bầu</th>
-                        <th>Số phiếu được bầu<br>(Gạch 4 + Gạch 3)</th>
+                        <th>Số phiếu được bầu</th>
                     </tr>
                 </thead>
-                <tbody id="body-combined"></tbody>
+                <tbody id="body-type1"></tbody>
             </table>
+            <div class="total-box" id="type1Total">Tổng phiếu bầu loại này: <span id="type1Sum">0</span></div>
             <div class="btn-center">
-                <button id="btn-combined" onclick="checkVotes('combined')">Xác nhận đã nhập xong</button>
+                <button id="btn-type1" onclick="checkVotes('type1')">Xác nhận đã nhập xong</button>
             </div>
-            <div id="result_combined"></div>
         </div>
 
+        <!-- PHẦN 2: BẦU 2 (Gạch 3) -->
         <div class="vote-table">
-            <h2>2. KIỂM NGƯỢC: Gạch 2 (Bầu 3)</h2>
-            <div class="check-type">Nhập số phiếu theo cặp BỊ GẠCH</div>
-            <table id="table-g2">
-                <thead><tr><th>STT</th><th>Cặp ứng viên BỊ GẠCH</th><th>Số phiếu</th></tr></thead>
-                <tbody id="body-g2"></tbody>
-            </table>
-            <div class="btn-center">
-                <button id="btn-g2" onclick="checkVotes('g2')">Xác nhận đã nhập xong</button>
+            <div class="section-counter">
+                <h3>PHIẾU BẦU 2 NGƯỜI (GẠCH 3)</h3>
+                <div class="counter-box">
+                    Số phiếu loại này: <input type="number" id="ballotType2Count" value="" style="width: 80px; margin-left: 10px;" oninput="updateType2Total(); onInputChange('type2')">
+                </div>
             </div>
-            <div id="result_g2"></div>
+            <div class="check-type">Nhập số phiếu ĐƯỢC BẦU cho từng người (mỗi phiếu bầu 2 người)</div>
+            <table class="combined-table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Người được bầu</th>
+                        <th>Số phiếu được bầu</th>
+                    </tr>
+                </thead>
+                <tbody id="body-type2"></tbody>
+            </table>
+            <div class="total-box" id="type2Total">Tổng phiếu bầu loại này: <span id="type2Sum">0</span> (lý thuyết: <span id="type2Expected">0</span>)</div>
+            <div class="btn-center">
+                <button id="btn-type2" onclick="checkVotes('type2')">Xác nhận đã nhập xong</button>
+            </div>
         </div>
 
+        <!-- PHẦN 3: BẦU 3 (Gạch 2) -->
+        <div class="vote-table">
+            <div class="section-counter">
+                <h3>PHIẾU BẦU 3 NGƯỜI (GẠCH 2)</h3>
+                <div class="counter-box">
+                    Số phiếu loại này: <input type="number" id="ballotType3Count" value="" style="width: 80px; margin-left: 10px;" oninput="updateCalculations(); onInputChange('type3')">
+                </div>
+            </div>
+            <div class="check-type">Nhập số phiếu theo cặp BỊ GẠCH (mỗi phiếu gạch 2 người, bầu 3 người còn lại)</div>
+            <table id="table-type3">
+                <thead><tr><th>STT</th><th>Cặp ứng viên BỊ GẠCH</th><th>Số phiếu</th></tr></thead>
+                <tbody id="body-type3"></tbody>
+            </table>
+            <div class="btn-center">
+                <button id="btn-type3" onclick="checkVotes('type3')">Xác nhận đã nhập xong</button>
+            </div>
+        </div>
+
+        <!-- TỔNG KẾT TẠM -->
+        <div class="vote-table" style="background-color: #fff8e1;">
+            <h2>TỔNG HỢP TẠM THỜI</h2>
+            <table>
+                <tr>
+                    <td><strong>Tổng phiếu hợp lệ (từ thông tin chung):</strong></td>
+                    <td><strong id="totalValidVotes" style="color: blue;">0</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Tổng phiếu 3 loại đã nhập:</strong></td>
+                    <td><strong id="totalEnteredVotes" style="color: green;">0</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Chênh lệch:</strong></td>
+                    <td><strong id="voteDifference" style="color: red;">0</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Trạng thái:</strong></td>
+                    <td><strong id="consistencyStatus">Chưa kiểm tra</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- NÚT TÍNH TOÁN CUỐI CÙNG -->
         <div style="text-align: center; margin: 40px 0;">
             <button onclick="calculateTotalResults()" style="background-color: #1E29FF; font-size: 15px; padding: 20px 40px;">
-                <span style="font-size: 16px; font-weight: bold; text-transform: uppercase;">XEM TỔNG KẾT CUỐI CÙNG</span><br>
-                <span style="font-size: 12px;">(Sau khi đã xác nhận xong 3 mục trên)</span>
+                <span style="font-size: 16px; font-weight: bold; text-transform: uppercase;">TÍNH TOÁN KẾT QUẢ CUỐI CÙNG</span><br>
+                <span style="font-size: 12px;">(Sau khi đã xác nhận xong tất cả các phần)</span>
             </button>
         </div>
 
+        <!-- KẾT QUẢ CUỐI CÙNG -->
         <div id="totalResults" class="summary" style="display: none;">
-            <h2>KẾT QUẢ TỔNG HỢP</h2>
+            <h2>KẾT QUẢ TỔNG HỢP CUỐI CÙNG</h2>
             <div id="totalError" class="error-message"></div>
             <table id="resultsTable">
-                <thead><tr><th>Ứng viên</th><th>Số phiếu ĐƯỢC BẦU</th><th>Tỷ lệ (%)</th></tr></thead>
+                <thead><tr><th>STT</th><th>Ứng viên</th><th>Số phiếu ĐƯỢC BẦU</th><th>Tỷ lệ (%)</th></tr></thead>
                 <tbody></tbody>
             </table>
             
@@ -128,11 +193,20 @@
         </div>
     </div>
 
-    <script src="config.js"></script>
     <script>
-        // Dữ liệu ứng viên được load từ config.js
+       
+        const candidates = {
+  'A': 'Nguyễn Văn An',
+  'B': 'Trần Kim Biên', 
+  'C': 'Hoàng Thị Châu',
+  'D': 'Lê Tấn Dũng',
+  'E': 'Bùi Thị Thanh Em'
+};
 
-        // Khai báo các tổ hợp cặp
+const candidateKeys = Object.keys(candidates);
+const candidateCount = candidateKeys.length;
+
+        // Tổ hợp cặp cho phần bầu 3
         const pairs = [
             {ids: ['A','B']}, {ids: ['A','C']}, {ids: ['A','D']}, {ids: ['A','E']},
             {ids: ['B','C']}, {ids: ['B','D']}, {ids: ['B','E']},
@@ -141,57 +215,107 @@
 
         // Trạng thái xác nhận và lưu dữ liệu
         let confirmedStatus = {
-            'general': false,
-            'combined': false,
-            'g2': false
+            'general': false, 'type1': false, 'type2': false, 'type3': false
         };
         
         let savedData = {
             'general': {},
-            'combined': {},
-            'g2': {}
+            'type1': {},
+            'type2': {},
+            'type3': {}
         };
 
         let finalResults = {};
 
-        // Tự động đổ tên vào bảng khi mở trang
+        // Tự động đổ dữ liệu khi mở trang
         window.onload = function() {
-            const bodyCombined = document.getElementById('body-combined');
+            // Phần bầu 1
+            const bodyType1 = document.getElementById('body-type1');
             candidateKeys.forEach((key, index) => {
-                bodyCombined.innerHTML += `
+                bodyType1.innerHTML += `
                     <tr>
                         <td>${index+1}</td>
                         <td>${candidates[key]}</td>
-                        <td><input type="number" id="vote_combined_${key}" value="0" oninput="onInputChange('combined')"></td>
+                        <td><input type="number" id="vote_type1_${key}" value="" oninput="updateType1Total(); onInputChange('type1')"></td>
                     </tr>`;
             });
 
-            const bodyG2 = document.getElementById('body-g2');
+            // Phần bầu 2
+            const bodyType2 = document.getElementById('body-type2');
+            candidateKeys.forEach((key, index) => {
+                bodyType2.innerHTML += `
+                    <tr>
+                        <td>${index+1}</td>
+                        <td>${candidates[key]}</td>
+                        <td><input type="number" id="vote_type2_${key}" value="" oninput="updateType2Total(); onInputChange('type2')"></td>
+                    </tr>`;
+            });
+
+            // Phần bầu 3
+            const bodyType3 = document.getElementById('body-type3');
             pairs.forEach((pair, index) => {
                 const names = pair.ids.map(id => candidates[id]).join(' và ');
-                bodyG2.innerHTML += `
+                bodyType3.innerHTML += `
                     <tr>
                         <td>${index+1}</td>
                         <td>${names}</td>
-                        <td><input type="number" id="vote_g2_${index}" value="0" oninput="onInputChange('g2')"></td>
+                        <td><input type="number" id="vote_type3_${index}" value="" oninput="onInputChange('type3')"></td>
                     </tr>`;
             });
 
             updateCalculations();
         };
 
-        // Cập nhật các tính toán
-        document.getElementById('totalVotersUnit').addEventListener('input', updateCalculations);
-        
+        // Cập nhật tổng phiếu bầu 1
+        function updateType1Total() {
+            let sum = 0;
+            candidateKeys.forEach(key => {
+                sum += parseInt(document.getElementById(`vote_type1_${key}`).value) || 0;
+            });
+            document.getElementById('type1Sum').textContent = sum;
+            
+            const ballotCount = parseInt(document.getElementById('ballotType1Count').value) || 0;
+            if (ballotCount > 0 && sum !== ballotCount) {
+                document.getElementById('type1Total').style.backgroundColor = '#ffebee';
+            } else {
+                document.getElementById('type1Total').style.backgroundColor = '#e8f5e9';
+            }
+            
+            updateTotalEnteredVotes();
+        }
+
+        // Cập nhật tổng phiếu bầu 2
+        function updateType2Total() {
+            let sum = 0;
+            candidateKeys.forEach(key => {
+                sum += parseInt(document.getElementById(`vote_type2_${key}`).value) || 0;
+            });
+            document.getElementById('type2Sum').textContent = sum;
+            
+            const ballotCount = parseInt(document.getElementById('ballotType2Count').value) || 0;
+            const expected = ballotCount * 2; // Mỗi phiếu bầu 2 người
+            document.getElementById('type2Expected').textContent = expected;
+            
+            if (expected > 0 && sum !== expected) {
+                document.getElementById('type2Total').style.backgroundColor = '#ffebee';
+            } else {
+                document.getElementById('type2Total').style.backgroundColor = '#e8f5e9';
+            }
+            
+            updateTotalEnteredVotes();
+        }
+
+        // Cập nhật các tính toán chung
         function updateCalculations() {
             const totalVotersUnit = parseInt(document.getElementById('totalVotersUnit').value) || 0;
             const actualVoters = parseInt(document.getElementById('actualVoters').value) || 0;
             const collectedBallots = parseInt(document.getElementById('collectedBallots').value) || 0;
             const invalidVotes = parseInt(document.getElementById('invalidVotes').value) || 0;
             
-            // Tính phiếu hợp lệ = phiếu thu vào - phiếu không hợp lệ
+            // Tính phiếu hợp lệ
             const validVotes = collectedBallots - invalidVotes;
             document.getElementById('validVotesCalc').textContent = validVotes >= 0 ? validVotes : 0;
+            document.getElementById('totalValidVotes').textContent = validVotes;
             
             // Tỷ lệ cử tri tham gia
             const turnout = totalVotersUnit > 0 ? ((actualVoters / totalVotersUnit) * 100).toFixed(2) : 0;
@@ -204,6 +328,30 @@
             // Tỷ lệ phiếu không hợp lệ
             const invalidRate = collectedBallots > 0 ? ((invalidVotes / collectedBallots) * 100).toFixed(2) : 0;
             document.getElementById('invalidVotesRate').textContent = invalidRate + '%';
+            
+            updateTotalEnteredVotes();
+        }
+
+        // Cập nhật tổng phiếu đã nhập
+        function updateTotalEnteredVotes() {
+            const type1Count = parseInt(document.getElementById('ballotType1Count').value) || 0;
+            const type2Count = parseInt(document.getElementById('ballotType2Count').value) || 0;
+            const type3Count = parseInt(document.getElementById('ballotType3Count').value) || 0;
+            
+            const totalEntered = type1Count + type2Count + type3Count;
+            document.getElementById('totalEnteredVotes').textContent = totalEntered;
+            
+            const validVotes = parseInt(document.getElementById('validVotesCalc').textContent) || 0;
+            const difference = totalEntered - validVotes;
+            document.getElementById('voteDifference').textContent = difference;
+            
+            if (difference === 0) {
+                document.getElementById('consistencyStatus').innerHTML = '<span style="color: green;">✓ KHỚP</span>';
+            } else if (difference > 0) {
+                document.getElementById('consistencyStatus').innerHTML = '<span style="color: red;">✗ DƯ ' + Math.abs(difference) + ' phiếu</span>';
+            } else {
+                document.getElementById('consistencyStatus').innerHTML = '<span style="color: orange;">✗ THIẾU ' + Math.abs(difference) + ' phiếu</span>';
+            }
         }
 
         // Xử lý khi người dùng nhập dữ liệu
@@ -212,17 +360,11 @@
                 confirmedStatus[type] = false;
                 const btn = document.getElementById('btn-' + type);
                 btn.classList.remove('confirmed');
-                if (type === 'general') {
-                    btn.textContent = 'Xác nhận đã nhập xong';
-                } else if (type === 'combined') {
-                    btn.textContent = 'Xác nhận đã nhập xong';
-                } else {
-                    btn.textContent = 'Xác nhận đã nhập xong';
-                }
+                btn.textContent = 'Xác nhận đã nhập xong';
             }
         }
 
-        // Xác nhận dữ liệu
+        // Xác nhận dữ liệu từng phần
         function checkVotes(type) {
             if (type === 'general') {
                 savedData.general = {
@@ -233,14 +375,21 @@
                     invalidVotes: parseInt(document.getElementById('invalidVotes').value) || 0,
                     validVotes: parseInt(document.getElementById('validVotesCalc').textContent) || 0
                 };
-            } else if (type === 'combined') {
+            } else if (type === 'type1') {
                 candidateKeys.forEach(key => {
-                    savedData.combined[key] = parseInt(document.getElementById(`vote_combined_${key}`).value) || 0;
+                    savedData.type1[key] = parseInt(document.getElementById(`vote_type1_${key}`).value) || 0;
                 });
-            } else if (type === 'g2') {
+                savedData.type1.count = parseInt(document.getElementById('ballotType1Count').value) || 0;
+            } else if (type === 'type2') {
+                candidateKeys.forEach(key => {
+                    savedData.type2[key] = parseInt(document.getElementById(`vote_type2_${key}`).value) || 0;
+                });
+                savedData.type2.count = parseInt(document.getElementById('ballotType2Count').value) || 0;
+            } else if (type === 'type3') {
                 pairs.forEach((pair, index) => {
-                    savedData.g2[index] = parseInt(document.getElementById(`vote_g2_${index}`).value) || 0;
+                    savedData.type3[index] = parseInt(document.getElementById(`vote_type3_${index}`).value) || 0;
                 });
+                savedData.type3.count = parseInt(document.getElementById('ballotType3Count').value) || 0;
             }
             
             confirmedStatus[type] = true;
@@ -248,52 +397,88 @@
             btn.classList.add('confirmed');
             btn.textContent = '✓ Đã xác nhận';
             
-            let message = '';
-            if (type === 'general') {
-                message = "Đã lưu dữ liệu Thông tin chung";
-            } else if (type === 'combined') {
-                message = "Đã lưu dữ liệu Kiểm xuôi (Gạch 4 + Gạch 3)";
-            } else {
-                message = "Đã lưu dữ liệu Gạch 2";
-            }
-            alert(message + ". Nhấn 'XEM TỔNG KẾT' để xem kết quả cuối cùng.");
+            alert("Đã lưu dữ liệu phần " + 
+                  (type === 'general' ? 'Thông tin chung' : 
+                   type === 'type1' ? 'Bầu 1' : 
+                   type === 'type2' ? 'Bầu 2' : 'Bầu 3'));
         }
 
-        // Tính tổng kết
+        // Tính toán kết quả cuối cùng
         function calculateTotalResults() {
-            // Lấy dữ liệu từ bộ nhớ đã lưu
-            const collectedBallots = savedData.general.collectedBallots || 0;
-            const invalidVotes = savedData.general.invalidVotes || 0;
+            // Kiểm tra đã xác nhận tất cả chưa
+            const allConfirmed = Object.values(confirmedStatus).every(status => status === true);
+            if (!allConfirmed) {
+                alert('Vui lòng xác nhận tất cả các phần trước khi tính toán!');
+                return;
+            }
+
+            // Kiểm tra tính đồng nhất
             const validVotes = savedData.general.validVotes || 0;
+            const totalEntered = (savedData.type1.count || 0) + (savedData.type2.count || 0) + (savedData.type3.count || 0);
             
+            if (totalEntered !== validVotes) {
+                if (!confirm(`Số phiếu 3 loại (${totalEntered}) không khớp với tổng phiếu hợp lệ (${validVotes}). Bạn vẫn muốn tiếp tục?`)) {
+                    return;
+                }
+            }
+
+            // RESET kết quả
             finalResults = { 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0 };
 
-            // 1. Tính từ dữ liệu đã lưu của Gạch 4 + Gạch 3 (Kiểm xuôi)
+            // 1. Cộng phiếu từ phần BẦU 1 (gạch 4)
             candidateKeys.forEach(key => {
-                finalResults[key] += savedData.combined[key] || 0;
+                finalResults[key] += savedData.type1[key] || 0;
             });
 
-            // 2. Tính Gạch 2 (Kiểm ngược: Phiếu được bầu = Tổng hợp lệ - Phiếu bị gạch)
+            // 2. Cộng phiếu từ phần BẦU 2 (gạch 3)
+            candidateKeys.forEach(key => {
+                finalResults[key] += savedData.type2[key] || 0;
+            });
+
+            // 3. Tính phiếu từ phần BẦU 3 (gạch 2) - KIỂM NGƯỢC
             pairs.forEach((pair, index) => {
-                const rejectedVal = savedData.g2[index] || 0;
-                const electedVal = validVotes - rejectedVal;
+                const rejectedVal = savedData.type3[index] || 0; // Số phiếu gạch cặp này
+                
+                // Mỗi phiếu gạch cặp này = bầu 3 người còn lại
                 candidateKeys.forEach(id => {
-                    if (!pair.ids.includes(id)) finalResults[id] += electedVal;
+                    if (!pair.ids.includes(id)) {
+                        finalResults[id] += rejectedVal;
+                    }
                 });
             });
 
-            // Hiển thị bảng kết quả
+            // 4. Hiển thị kết quả
             const tbody = document.querySelector('#resultsTable tbody');
             tbody.innerHTML = '';
+            
+            // Tính tổng số phiếu bầu thực tế
+            const totalVotesFromType1 = Object.values(savedData.type1).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
+            const totalVotesFromType2 = Object.values(savedData.type2).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
+            const totalVotesFromType3 = (savedData.type3.count || 0) * 3; // Mỗi phiếu bầu 3 người
+            
+            const totalActualVotes = totalVotesFromType1 + totalVotesFromType2 + totalVotesFromType3;
+            
+            // Sắp xếp và hiển thị
             const sorted = Object.keys(finalResults).sort((a,b) => finalResults[b] - finalResults[a]);
             
-            sorted.forEach(key => {
+            sorted.forEach((key, index) => {
                 const row = tbody.insertRow();
-                row.insertCell(0).textContent = candidates[key];
-                row.insertCell(1).textContent = finalResults[key];
-                const pct = validVotes > 0 ? ((finalResults[key] / (validVotes * 3)) * 100).toFixed(2) : 0;
-                row.insertCell(2).textContent = pct + '%';
+                row.insertCell(0).textContent = index + 1;
+                row.insertCell(1).textContent = candidates[key];
+                row.insertCell(2).textContent = finalResults[key];
+                
+                // Tính tỷ lệ % so với tổng số phiếu bầu thực tế
+                const pct = totalActualVotes > 0 ? ((finalResults[key] / totalActualVotes) * 100).toFixed(2) : 0;
+                row.insertCell(3).textContent = pct + '%';
             });
+            
+            // Thêm dòng tổng
+            const totalRow = tbody.insertRow();
+            totalRow.style.backgroundColor = '#f5f5f5';
+            totalRow.insertCell(0).textContent = '';
+            totalRow.insertCell(1).innerHTML = '<strong>TỔNG CỘNG:</strong>';
+            totalRow.insertCell(2).innerHTML = '<strong>' + Object.values(finalResults).reduce((a,b) => a + b, 0) + '</strong>';
+            totalRow.insertCell(3).innerHTML = '<strong>100%</strong>';
             
             document.getElementById('totalResults').style.display = 'block';
             document.getElementById('totalResults').scrollIntoView({ behavior: 'smooth' });
@@ -301,120 +486,95 @@
 
         // Xuất file Excel
         function exportToExcel() {
-            // Lấy dữ liệu từ bộ nhớ đã lưu
-            const totalVotersUnit = savedData.general.totalVotersUnit || 0;
-            const actualVoters = savedData.general.actualVoters || 0;
-            const issuedBallots = savedData.general.issuedBallots || 0;
-            const collectedBallots = savedData.general.collectedBallots || 0;
-            const invalidVotes = savedData.general.invalidVotes || 0;
-            const validVotes = savedData.general.validVotes || 0;
-            
-            const voterTurnout = totalVotersUnit > 0 ? ((actualVoters / totalVotersUnit) * 100).toFixed(2) : 0;
-            const validRate = collectedBallots > 0 ? ((validVotes / collectedBallots) * 100).toFixed(2) : 0;
-            const invalidRate = collectedBallots > 0 ? ((invalidVotes / collectedBallots) * 100).toFixed(2) : 0;
-
             // Tạo workbook
             const wb = XLSX.utils.book_new();
 
             // Sheet 1: Báo cáo tổng hợp
             const summaryData = [
-                ['BIÊN BẢN KIỂM PHIẾU BẦU CỬ'],
+                ['BIÊN BẢN KIỂM PHIẾU BẦU CỬ (5 BẦU 3)'],
                 ['Ngày xuất: ' + new Date().toLocaleString('vi-VN')],
                 [],
                 ['THÔNG TIN BẦU CỬ'],
-                ['Số cử tri đã tham gia bỏ phiếu:', actualVoters + ' người'],
-                ['Tỷ lệ cử tri đã tham gia bỏ phiếu so với tổng số cử tri của đơn vị bầu cử:', voterTurnout + '%'],
-                ['Số phiếu phát ra:', issuedBallots + ' phiếu'],
-                ['Số phiếu thu vào:', collectedBallots + ' phiếu'],
-                ['Số phiếu hợp lệ:', validVotes + ' phiếu', 'Tỷ lệ so với tổng số phiếu thu vào: ' + validRate + '%'],
-                ['Số phiếu không hợp lệ:', invalidVotes + ' phiếu', 'Tỷ lệ so với tổng số phiếu thu vào: ' + invalidRate + '%'],
+                ['Tổng số cử tri:', savedData.general.totalVotersUnit],
+                ['Số cử tri đã tham gia bỏ phiếu:', savedData.general.actualVoters],
+                ['Số phiếu phát ra:', savedData.general.issuedBallots],
+                ['Số phiếu thu vào:', savedData.general.collectedBallots],
+                ['Số phiếu hợp lệ:', savedData.general.validVotes],
+                ['Số phiếu không hợp lệ:', savedData.general.invalidVotes],
+                [],
+                ['PHÂN LOẠI PHIẾU'],
+                ['Phiếu bầu 1 người (gạch 4):', savedData.type1.count],
+                ['Phiếu bầu 2 người (gạch 3):', savedData.type2.count],
+                ['Phiếu bầu 3 người (gạch 2):', savedData.type3.count],
+                ['Tổng cộng:', (savedData.type1.count || 0) + (savedData.type2.count || 0) + (savedData.type3.count || 0)],
                 [],
                 ['KẾT QUẢ BẦU CỬ'],
                 ['Số phiếu bầu cho mỗi người ứng cử như sau:'],
                 []
             ];
 
-            // Thêm dữ liệu ứng viên (sắp xếp theo số phiếu giảm dần)
+            // Thêm dữ liệu ứng viên
             const sorted = Object.keys(finalResults).sort((a,b) => finalResults[b] - finalResults[a]);
             sorted.forEach((key, index) => {
-                const votePct = validVotes > 0 ? ((finalResults[key] / (validVotes * 3)) * 100).toFixed(2) : 0;
+                const totalVotesFromType1 = Object.values(savedData.type1).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
+                const totalVotesFromType2 = Object.values(savedData.type2).reduce((a, b) => (typeof b === 'number' ? a + b : a), 0);
+                const totalVotesFromType3 = (savedData.type3.count || 0) * 3;
+                const totalActualVotes = totalVotesFromType1 + totalVotesFromType2 + totalVotesFromType3;
+                const pct = totalActualVotes > 0 ? ((finalResults[key] / totalActualVotes) * 100).toFixed(2) : 0;
+                
                 summaryData.push([
                     (index + 1) + '. ' + candidates[key],
-                    'được ' + finalResults[key] + ' phiếu/' + (validVotes * 3) + ' phiếu hợp lệ',
-                    votePct + '%'
+                    finalResults[key] + ' phiếu',
+                    pct + '%'
                 ]);
             });
 
             const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
-            
-            // Định dạng độ rộng cột
-            ws1['!cols'] = [
-                { wch: 50 },
-                { wch: 35 },
-                { wch: 15 }
-            ];
-
+            ws1['!cols'] = [{ wch: 40 }, { wch: 20 }, { wch: 15 }];
             XLSX.utils.book_append_sheet(wb, ws1, 'Biên bản tổng hợp');
 
-            // Sheet 2: Bảng thống kê chi tiết
-            const detailTable = [
-                ['BẢNG THỐNG KÊ CHI TIẾT'],
-                [],
-                ['STT', 'Ứng viên', 'Số phiếu được bầu', 'Tỷ lệ (%)']
-            ];
-
-            sorted.forEach((key, index) => {
-                const votePct = validVotes > 0 ? ((finalResults[key] / (validVotes * 3)) * 100).toFixed(2) : 0;
-                detailTable.push([
-                    index + 1,
-                    candidates[key],
-                    finalResults[key],
-                    votePct
-                ]);
-            });
-
-            const ws2 = XLSX.utils.aoa_to_sheet(detailTable);
-            ws2['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }, { wch: 15 }];
-            XLSX.utils.book_append_sheet(wb, ws2, 'Thống kê chi tiết');
-
-            // Sheet 3: Chi tiết kiểm xuôi
-            const detailData1 = [
-                ['CHI TIẾT KIỂM XUÔI (Gạch 4 + Gạch 3)'],
+            // Sheet 2: Chi tiết bầu 1
+            const detail1 = [
+                ['CHI TIẾT PHIẾU BẦU 1 NGƯỜI (GẠCH 4)'],
+                ['Số phiếu loại này: ' + (savedData.type1.count || 0)],
                 [],
                 ['STT', 'Ứng viên', 'Số phiếu được bầu']
             ];
-
             candidateKeys.forEach((key, index) => {
-                detailData1.push([
-                    index + 1,
-                    candidates[key],
-                    savedData.combined[key] || 0
-                ]);
+                detail1.push([index + 1, candidates[key], savedData.type1[key] || 0]);
             });
+            const ws2 = XLSX.utils.aoa_to_sheet(detail1);
+            ws2['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(wb, ws2, 'Chi tiết Bầu 1');
 
-            const ws3 = XLSX.utils.aoa_to_sheet(detailData1);
-            ws3['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 20 }];
-            XLSX.utils.book_append_sheet(wb, ws3, 'Chi tiết Kiểm xuôi');
-
-            // Sheet 4: Chi tiết kiểm ngược
-            const detailData2 = [
-                ['CHI TIẾT KIỂM NGƯỢC (Gạch 2)'],
+            // Sheet 3: Chi tiết bầu 2
+            const detail2 = [
+                ['CHI TIẾT PHIẾU BẦU 2 NGƯỜI (GẠCH 3)'],
+                ['Số phiếu loại này: ' + (savedData.type2.count || 0)],
                 [],
-                ['STT', 'Cặp ứng viên bị gạch', 'Số phiếu']
+                ['STT', 'Ứng viên', 'Số phiếu được bầu']
             ];
+            candidateKeys.forEach((key, index) => {
+                detail2.push([index + 1, candidates[key], savedData.type2[key] || 0]);
+            });
+            const ws3 = XLSX.utils.aoa_to_sheet(detail2);
+            ws3['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }];
+            XLSX.utils.book_append_sheet(wb, ws3, 'Chi tiết Bầu 2');
 
+            // Sheet 4: Chi tiết bầu 3
+            const detail3 = [
+                ['CHI TIẾT PHIẾU BẦU 3 NGƯỜI (GẠCH 2)'],
+                ['Số phiếu loại này: ' + (savedData.type3.count || 0)],
+                [],
+                ['STT', 'Cặp bị gạch', 'Số phiếu']
+            ];
             pairs.forEach((pair, index) => {
                 const names = pair.ids.map(id => candidates[id]).join(' và ');
-                detailData2.push([
-                    index + 1,
-                    names,
-                    savedData.g2[index] || 0
-                ]);
+                detail3.push([index + 1, names, savedData.type3[index] || 0]);
             });
-
-            const ws4 = XLSX.utils.aoa_to_sheet(detailData2);
-            ws4['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 15 }];
-            XLSX.utils.book_append_sheet(wb, ws4, 'Chi tiết Kiểm ngược');
+            const ws4 = XLSX.utils.aoa_to_sheet(detail3);
+            ws4['!cols'] = [{ wch: 5 }, { wch: 35 }, { wch: 15 }];
+            XLSX.utils.book_append_sheet(wb, ws4, 'Chi tiết Bầu 3');
 
             // Xuất file
             const fileName = `Bien_ban_kiem_phieu_${new Date().toISOString().slice(0,10)}.xlsx`;
