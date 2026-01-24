@@ -35,20 +35,19 @@ button.confirmed:hover { background-color: #707070; }
 .logic-status { padding: 8px; margin-top: 5px; border-radius: 4px; font-weight: bold; text-align: center; }
 .logic-ok { background-color: #e8f5e9; color: #2e7d32; }
 .logic-error { background-color: #ffebee; color: #c62828; }
+.preview-table th, .preview-table td { text-align: center; }
 </style>
 </head>
 <body>
 <div class="container">
 <h1>MÁY TÍNH KIỂM PHIẾU BẦU CỬ (5 BẦU 3)</h1>
-
 <!-- THÔNG TIN CHUNG -->
 <div class="vote-table">
 <h2>THÔNG TIN CHUNG</h2>
 <table>
 <tr>
 <td><strong>Tổng số cử tri:</strong></td>
-<td><input type="number" id="totalVotersUnit" value="" oninput="onInputChange('general')"></td><td><strong>Số cử tri tham gia bỏ phiếu:</strong></td>
-<td><input type="number" id="actualVoters" value="" oninput="updateCalculations(); onInputChange('general')"></td>
+<td><input type="number" id="totalVotersUnit" value="" oninput="onInputChange('general')"></td><td><strong>Số cử tri tham gia bỏ phiếu:</strong></td><td><input type="number" id="actualVoters" value="" oninput="updateCalculations(); onInputChange('general')"></td>
 </tr>
 <tr>
 <td colspan="3"><strong>Tỷ lệ cử tri tham gia:</strong></td>
@@ -79,7 +78,6 @@ button.confirmed:hover { background-color: #707070; }
 <button id="btn-general" onclick="checkVotes('general')">Xác nhận đã nhập xong</button>
 </div>
 </div>
-
 <!-- BẦU 1 -->
 <div class="vote-table">
 <div class="section-counter">
@@ -98,9 +96,7 @@ Số phiếu loại này: <input type="number" id="ballotType1Count" value="" st
 <div class="btn-center">
 <button id="btn-type1" onclick="checkVotes('type1')">Xác nhận đã nhập xong</button></div>
 </div>
-
-<!-- BẦU 2 -->
-<div class="vote-table">
+<!-- BẦU 2 --><div class="vote-table">
 <div class="section-counter">
 <h3>PHIẾU BẦU 2 NGƯỜI (GẠCH 3)</h3>
 <div class="counter-box">
@@ -118,7 +114,6 @@ Số phiếu loại này: <input type="number" id="ballotType2Count" value="" st
 <button id="btn-type2" onclick="checkVotes('type2')">Xác nhận đã nhập xong</button>
 </div>
 </div>
-
 <!-- BẦU 3 -->
 <div class="vote-table">
 <div class="section-counter">
@@ -137,7 +132,6 @@ Số phiếu loại này: <input type="number" id="ballotType3Count" value="" st
 <button id="btn-type3" onclick="checkVotes('type3')">Xác nhận đã nhập xong</button>
 </div>
 </div>
-
 <!-- TỔNG HỢP TẠM -->
 <div class="vote-table" style="background-color: #fff8e1;">
 <h2>TỔNG HỢP TẠM THỜI</h2>
@@ -145,7 +139,32 @@ Số phiếu loại này: <input type="number" id="ballotType3Count" value="" st
 <tr><td><strong>Tổng phiếu hợp lệ:</strong></td><td><strong id="totalValidVotes" style="color: blue;">0</strong></td></tr>
 <tr><td><strong>Tổng phiếu 3 loại đã nhập:</strong></td><td><strong id="totalEnteredVotes" style="color: green;">0</strong></td></tr>
 <tr><td><strong>Chênh lệch:</strong></td><td><strong id="voteDifference" style="color: red;">0</strong></td></tr>
-<tr><td><strong>Trạng thái:</strong></td><td><strong id="consistencyStatus">Chưa kiểm tra</strong></td></tr></table>
+<tr><td><strong>Trạng thái:</strong></td><td><strong id="consistencyStatus">Chưa kiểm tra</strong></td></tr>
+</table>
+</div>
+
+<!-- BẢNG XEM TRƯỚC KẾT QUẢ CHI TIẾT -->
+<div class="vote-table" style="background-color: #f9f9ff;">
+<h2>XEM TRƯỚC KẾT QUẢ THEO ỨNG CỬ VIÊN</h2><table class="preview-table" id="previewResultsTable">
+<thead>
+<tr>
+<th>STT</th>
+<th>Họ và tên</th>
+<th colspan="2">Số phiếu bầu</th>
+<th colspan="2">Số phiếu không bầu</th>
+</tr>
+<tr>
+<th></th>
+<th></th>
+<th>Số phiếu</th>
+<th>Tỷ lệ (%)</th>
+<th>Số phiếu</th>
+<th>Tỷ lệ (%)</th>
+</tr>
+</thead>
+<tbody id="previewResultsBody"></tbody>
+<tfoot id="previewResultsFooter"></tfoot>
+</table>
 </div>
 
 <!-- NÚT TÍNH TOÁN -->
@@ -155,7 +174,6 @@ Số phiếu loại này: <input type="number" id="ballotType3Count" value="" st
 <span style="font-size: 12px;">(Sau khi đã xác nhận xong tất cả các phần)</span>
 </button>
 </div>
-
 <!-- KẾT QUẢ CUỐI -->
 <div id="totalResults" class="summary" style="display: none;">
 <h2>KẾT QUẢ TỔNG HỢP CUỐI CÙNG</h2>
@@ -168,285 +186,341 @@ Số phiếu loại này: <input type="number" id="ballotType3Count" value="" st
 </div>
 </div>
 </div>
-
 <script src="config.js"></script>
-
 <script>
 const pairs = [
 {ids: ['A','B']}, {ids: ['A','C']}, {ids: ['A','D']}, {ids: ['A','E']},
 {ids: ['B','C']}, {ids: ['B','D']}, {ids: ['B','E']},
 {ids: ['C','D']}, {ids: ['C','E']}, {ids: ['D','E']}
 ];
-
 let confirmedStatus = {'general': false, 'type1': false, 'type2': false, 'type3': false};
-let savedData = {'general': {}, 'type1': {}, 'type2': {}, 'type3': {}};
-let finalResults = {};
-
+let savedData = {'general': {}, 'type1': {}, 'type2': {}, 'type3': {}};let finalResults = {};
 window.onload = function() {
-	const body1 = document.getElementById('body-type1');
-	candidateKeys.forEach((key, i) => {
-		body1.innerHTML += `<tr><td>${i+1}</td><td>${candidates[key]}</td><td><input type="number" id="vote_type1_${key}" value="" oninput="updateType1Logic(); onInputChange('type1')"></td></tr>`;
-	});
-	const body2 = document.getElementById('body-type2');
-	candidateKeys.forEach((key, i) => {		body2.innerHTML += `<tr><td>${i+1}</td><td>${candidates[key]}</td><td><input type="number" id="vote_type2_${key}" value="" oninput="updateType2Logic(); onInputChange('type2')"></td></tr>`;
-	});
-	const body3 = document.getElementById('body-type3');
-	pairs.forEach((pair, i) => {
-		const names = pair.ids.map(id => candidates[id]).join(' và ');
-		body3.innerHTML += `<tr><td>${i+1}</td><td>${names}</td><td><input type="number" id="vote_type3_${i}" value="" oninput="updateType3Logic(); onInputChange('type3')"></td></tr>`;
-	});
-	updateCalculations();
+const body1 = document.getElementById('body-type1');
+candidateKeys.forEach((key, i) => {
+body1.innerHTML += `<tr><td>${i+1}</td><td>${candidates[key]}</td><td><input type="number" id="vote_type1_${key}" value="" oninput="updateType1Logic(); onInputChange('type1')"></td></tr>`;
+});
+const body2 = document.getElementById('body-type2');
+candidateKeys.forEach((key, i) => {		body2.innerHTML += `<tr><td>${i+1}</td><td>${candidates[key]}</td><td><input type="number" id="vote_type2_${key}" value="" oninput="updateType2Logic(); onInputChange('type2')"></td></tr>`;
+});
+const body3 = document.getElementById('body-type3');
+pairs.forEach((pair, i) => {
+const names = pair.ids.map(id => candidates[id]).join(' và ');
+body3.innerHTML += `<tr><td>${i+1}</td><td>${names}</td><td><input type="number" id="vote_type3_${i}" value="" oninput="updateType3Logic(); onInputChange('type3')"></td></tr>`;
+});
+updateCalculations();
 };
 
+// --- HÀM CẬP NHẬT BẢNG XEM TRƯỚC ---
+function updatePreviewTable() {
+const validVotes = savedData.general?.validVotes || parseInt(document.getElementById('validVotesCalc').textContent) || 0;
+if (validVotes <= 0 || !finalResults || Object.keys(finalResults).length === 0) {
+document.getElementById('previewResultsBody').innerHTML = '<tr><td colspan="6">Chưa có dữ liệu để hiển thị</td></tr>';
+document.getElementById('previewResultsFooter').innerHTML = '';
+return;
+}
+
+const sorted = Object.keys(finalResults).sort((a, b) => finalResults[b] - finalResults[a]);
+
+let totalBau = 0;
+let totalKhongBau = 0;
+
+let html = '';
+sorted.forEach((key, idx) => {
+const votesBau = finalResults[key];
+const votesKhongBau = validVotes - votesBau;
+const pctBau = validVotes > 0 ? ((votesBau / validVotes) * 100).toFixed(2) : '0.00';
+const pctKhongBau = validVotes > 0 ? ((votesKhongBau / validVotes) * 100).toFixed(2) : '0.00';
+
+totalBau += votesBau;
+totalKhongBau += votesKhongBau;
+
+html += `
+<tr>
+<td>${idx + 1}</td>
+<td>${candidates[key]}</td>
+<td>${votesBau}</td>
+<td>${pctBau}</td>
+<td>${votesKhongBau}</td>
+<td>${pctKhongBau}</td>
+</tr>`;
+});
+
+document.getElementById('previewResultsBody').innerHTML = html;
+
+// Dòng tổng
+document.getElementById('previewResultsFooter').innerHTML = `
+<tr style="font-weight: bold; background-color: #f5f5f5;">
+<td colspan="2">TỔNG CỘNG</td>
+<td>${totalBau}</td>
+<td>100.00</td>
+<td>${totalKhongBau}</td>
+<td>100.00</td>
+</tr>
+`;
+}
+
 function updateType1Logic() {
-	const count = parseInt(document.getElementById('ballotType1Count').value) || 0;
-	let sum = 0;
-	candidateKeys.forEach(k => sum += parseInt(document.getElementById(`vote_type1_${k}`).value) || 0);
-	document.getElementById('type1Sum').textContent = sum;
-	const el = document.getElementById('logic-type1');
-	if (count === 0 && sum === 0) {
-		el.className = 'logic-status'; el.textContent = '';
-	} else if (sum === count) {
-		el.className = 'logic-status logic-ok'; el.textContent = '✓ Hợp lệ: Tổng phiếu = số phiếu loại này';
-	} else {
-		el.className = 'logic-status logic-error'; el.textContent = `✗ Không hợp lệ: Tổng phiếu (${sum}) ≠ số phiếu loại này (${count})`;
-	}
-	updateTotalEnteredVotes();
+const count = parseInt(document.getElementById('ballotType1Count').value) || 0;
+let sum = 0;
+candidateKeys.forEach(k => sum += parseInt(document.getElementById(`vote_type1_${k}`).value) || 0);
+document.getElementById('type1Sum').textContent = sum;
+const el = document.getElementById('logic-type1');
+if (count === 0 && sum === 0) {
+el.className = 'logic-status'; el.textContent = '';
+} else if (sum === count) {
+el.className = 'logic-status logic-ok'; el.textContent = '✓ Hợp lệ: Tổng phiếu = số phiếu loại này';
+} else {
+el.className = 'logic-status logic-error'; el.textContent = `✗ Không hợp lệ: Tổng phiếu (${sum}) ≠ số phiếu loại này (${count})`;
 }
-
+updateTotalEnteredVotes();
+}
 function updateType2Logic() {
-	const count = parseInt(document.getElementById('ballotType2Count').value) || 0;
-	let sum = 0;
-	candidateKeys.forEach(k => sum += parseInt(document.getElementById(`vote_type2_${k}`).value) || 0);
-	document.getElementById('type2Sum').textContent = sum;
-	const expected = count * 2;
-	document.getElementById('type2Expected').textContent = expected;
-	const el = document.getElementById('logic-type2');
-	if (count === 0 && sum === 0) {
-		el.className = 'logic-status'; el.textContent = '';
-	} else if (sum === expected) {
-		el.className = 'logic-status logic-ok'; el.textContent = '✓ Hợp lệ: Tổng phiếu = 2 × số phiếu loại này';
-	} else {
-		el.className = 'logic-status logic-error'; el.textContent = `✗ Không hợp lệ: Tổng phiếu (${sum}) ≠ 2 × số phiếu loại này (${expected})`;
-	}
-	updateTotalEnteredVotes();
+const count = parseInt(document.getElementById('ballotType2Count').value) || 0;
+let sum = 0;
+candidateKeys.forEach(k => sum += parseInt(document.getElementById(`vote_type2_${k}`).value) || 0);
+document.getElementById('type2Sum').textContent = sum;
+const expected = count * 2;
+document.getElementById('type2Expected').textContent = expected;
+const el = document.getElementById('logic-type2');
+if (count === 0 && sum === 0) {
+el.className = 'logic-status'; el.textContent = '';
+} else if (sum === expected) {
+el.className = 'logic-status logic-ok'; el.textContent = '✓ Hợp lệ: Tổng phiếu = 2 × số phiếu loại này';
+} else {
+el.className = 'logic-status logic-error'; el.textContent = `✗ Không hợp lệ: Tổng phiếu (${sum}) ≠ 2 × số phiếu loại này (${expected})`;
 }
-
-function updateType3Logic() {
-	const count = parseInt(document.getElementById('ballotType3Count').value) || 0;
-	let sum = 0;
-	pairs.forEach((_, i) => sum += parseInt(document.getElementById(`vote_type3_${i}`).value) || 0);
-	const el = document.getElementById('logic-type3');
-	if (count === 0 && sum === 0) {		el.className = 'logic-status'; el.textContent = '';
-	} else if (sum === count) {
-		el.className = 'logic-status logic-ok'; el.textContent = '✓ Hợp lệ: Tổng phiếu gạch = số phiếu loại này';
-	} else {
-		el.className = 'logic-status logic-error'; el.textContent = `✗ Không hợp lệ: Tổng phiếu gạch (${sum}) ≠ số phiếu loại này (${count})`;
-	}
-	updateTotalEnteredVotes();
+updateTotalEnteredVotes();
 }
-
+function updateType3Logic() {const count = parseInt(document.getElementById('ballotType3Count').value) || 0;
+let sum = 0;
+pairs.forEach((_, i) => sum += parseInt(document.getElementById(`vote_type3_${i}`).value) || 0);
+const el = document.getElementById('logic-type3');
+if (count === 0 && sum === 0) {		el.className = 'logic-status'; el.textContent = '';
+} else if (sum === count) {
+el.className = 'logic-status logic-ok'; el.textContent = '✓ Hợp lệ: Tổng phiếu gạch = số phiếu loại này';
+} else {
+el.className = 'logic-status logic-error'; el.textContent = `✗ Không hợp lệ: Tổng phiếu gạch (${sum}) ≠ số phiếu loại này (${count})`;
+}
+updateTotalEnteredVotes();
+}
 function updateCalculations() {
-	const totalVoters = parseInt(document.getElementById('totalVotersUnit').value) || 0;
-	const actual = parseInt(document.getElementById('actualVoters').value) || 0;
-	const collected = parseInt(document.getElementById('collectedBallots').value) || 0;
-	const invalid = parseInt(document.getElementById('invalidVotes').value) || 0;
-	const valid = Math.max(0, collected - invalid);
-	document.getElementById('validVotesCalc').textContent = valid;
-	document.getElementById('totalValidVotes').textContent = valid;
-	document.getElementById('voterTurnout').textContent = (totalVoters > 0 ? ((actual / totalVoters) * 100).toFixed(2) : 0) + '%';
-	document.getElementById('validVotesRate').textContent = (collected > 0 ? ((valid / collected) * 100).toFixed(2) : 0) + '%';
-	document.getElementById('invalidVotesRate').textContent = (collected > 0 ? ((invalid / collected) * 100).toFixed(2) : 0) + '%';
-	updateTotalEnteredVotes();
+const totalVoters = parseInt(document.getElementById('totalVotersUnit').value) || 0;
+const actual = parseInt(document.getElementById('actualVoters').value) || 0;
+const collected = parseInt(document.getElementById('collectedBallots').value) || 0;
+const invalid = parseInt(document.getElementById('invalidVotes').value) || 0;
+const valid = Math.max(0, collected - invalid);
+document.getElementById('validVotesCalc').textContent = valid;
+document.getElementById('totalValidVotes').textContent = valid;
+document.getElementById('voterTurnout').textContent = (totalVoters > 0 ? ((actual / totalVoters) * 100).toFixed(2) : 0) + '%';
+document.getElementById('validVotesRate').textContent = (collected > 0 ? ((valid / collected) * 100).toFixed(2) : 0) + '%';
+document.getElementById('invalidVotesRate').textContent = (collected > 0 ? ((invalid / collected) * 100).toFixed(2) : 0) + '%';
+updateTotalEnteredVotes();
 }
-
 function updateTotalEnteredVotes() {
-	const t1 = parseInt(document.getElementById('ballotType1Count').value) || 0;
-	const t2 = parseInt(document.getElementById('ballotType2Count').value) || 0;
-	const t3 = parseInt(document.getElementById('ballotType3Count').value) || 0;
-	const total = t1 + t2 + t3;
-	const valid = parseInt(document.getElementById('validVotesCalc').textContent) || 0;
-	document.getElementById('totalEnteredVotes').textContent = total;
-	document.getElementById('voteDifference').textContent = total - valid;
-	const statusEl = document.getElementById('consistencyStatus');
-	if (total === valid) {
-		statusEl.innerHTML = '<span style="color:green;">✓ KHỚP</span>';
-	} else if (total > valid) {
-		statusEl.innerHTML = `<span style="color:red;">✗ DƯ ${total - valid} phiếu</span>`;
-	} else {
-		statusEl.innerHTML = `<span style="color:orange;">✗ THIẾU ${valid - total} phiếu</span>`;
-	}
+const t1 = parseInt(document.getElementById('ballotType1Count').value) || 0;
+const t2 = parseInt(document.getElementById('ballotType2Count').value) || 0;
+const t3 = parseInt(document.getElementById('ballotType3Count').value) || 0;
+const total = t1 + t2 + t3;
+const valid = parseInt(document.getElementById('validVotesCalc').textContent) || 0;
+document.getElementById('totalEnteredVotes').textContent = total;
+document.getElementById('voteDifference').textContent = total - valid;
+const statusEl = document.getElementById('consistencyStatus');
+if (total === valid) {
+statusEl.innerHTML = '<span style="color:green;">✓ KHỚP</span>';
+} else if (total > valid) {
+statusEl.innerHTML = `<span style="color:red;">✗ DƯ ${total - valid} phiếu</span>`;
+} else {
+statusEl.innerHTML = `<span style="color:orange;">✗ THIẾU ${valid - total} phiếu</span>`;
 }
-
+}
 function onInputChange(type) {
-	if (confirmedStatus[type]) {
-		confirmedStatus[type] = false;
-		const btn = document.getElementById('btn-' + type);
-		btn.classList.remove('confirmed');
-		btn.textContent = 'Xác nhận đã nhập xong';
-	}
+if (confirmedStatus[type]) {
+confirmedStatus[type] = false;
+const btn = document.getElementById('btn-' + type);
+btn.classList.remove('confirmed');
+btn.textContent = 'Xác nhận đã nhập xong';
 }
-function checkVotes(type) {
-	if (type === 'general') {
-		savedData.general = {
-			totalVotersUnit: parseInt(document.getElementById('totalVotersUnit').value) || 0,
-			actualVoters: parseInt(document.getElementById('actualVoters').value) || 0,
-			issuedBallots: parseInt(document.getElementById('issuedBallots').value) || 0,
-			collectedBallots: parseInt(document.getElementById('collectedBallots').value) || 0,
-			invalidVotes: parseInt(document.getElementById('invalidVotes').value) || 0,
-			validVotes: parseInt(document.getElementById('validVotesCalc').textContent) || 0
-		};
-	} else if (type === 'type1') {
-		candidateKeys.forEach(k => savedData.type1[k] = parseInt(document.getElementById(`vote_type1_${k}`).value) || 0);
-		savedData.type1.count = parseInt(document.getElementById('ballotType1Count').value) || 0;
-	} else if (type === 'type2') {
-		candidateKeys.forEach(k => savedData.type2[k] = parseInt(document.getElementById(`vote_type2_${k}`).value) || 0);
-		savedData.type2.count = parseInt(document.getElementById('ballotType2Count').value) || 0;
-	} else if (type === 'type3') {
-		pairs.forEach((_, i) => savedData.type3[i] = parseInt(document.getElementById(`vote_type3_${i}`).value) || 0);
-		savedData.type3.count = parseInt(document.getElementById('ballotType3Count').value) || 0;
-	}
-	confirmedStatus[type] = true;
-	const btn = document.getElementById('btn-' + type);
-	btn.classList.add('confirmed');
-	btn.textContent = '✓ Đã xác nhận';
-	alert("Đã lưu dữ liệu phần " + (type === 'general' ? 'Thông tin chung' : type === 'type1' ? 'Bầu 1' : type === 'type2' ? 'Bầu 2' : 'Bầu 3'));
+}function checkVotes(type) {
+if (type === 'general') {
+savedData.general = {
+totalVotersUnit: parseInt(document.getElementById('totalVotersUnit').value) || 0,
+actualVoters: parseInt(document.getElementById('actualVoters').value) || 0,
+issuedBallots: parseInt(document.getElementById('issuedBallots').value) || 0,
+collectedBallots: parseInt(document.getElementById('collectedBallots').value) || 0,
+invalidVotes: parseInt(document.getElementById('invalidVotes').value) || 0,
+validVotes: parseInt(document.getElementById('validVotesCalc').textContent) || 0
+};
+} else if (type === 'type1') {
+candidateKeys.forEach(k => savedData.type1[k] = parseInt(document.getElementById(`vote_type1_${k}`).value) || 0);
+savedData.type1.count = parseInt(document.getElementById('ballotType1Count').value) || 0;
+} else if (type === 'type2') {
+candidateKeys.forEach(k => savedData.type2[k] = parseInt(document.getElementById(`vote_type2_${k}`).value) || 0);
+savedData.type2.count = parseInt(document.getElementById('ballotType2Count').value) || 0;
+} else if (type === 'type3') {
+pairs.forEach((_, i) => savedData.type3[i] = parseInt(document.getElementById(`vote_type3_${i}`).value) || 0);
+savedData.type3.count = parseInt(document.getElementById('ballotType3Count').value) || 0;
 }
-
+confirmedStatus[type] = true;
+const btn = document.getElementById('btn-' + type);
+btn.classList.add('confirmed');
+btn.textContent = '✓ Đã xác nhận';
+alert("Đã lưu dữ liệu phần " + (type === 'general' ? 'Thông tin chung' : type === 'type1' ? 'Bầu 1' : type === 'type2' ? 'Bầu 2' : 'Bầu 3'));
+}
 function calculateTotalResults() {
-	if (!Object.values(confirmedStatus).every(v => v)) {
-		alert('Vui lòng xác nhận tất cả các phần trước khi tính toán!');
-		return;
-	}
-	const validVotes = savedData.general.validVotes || 0;
-	const totalEntered = (savedData.type1.count || 0) + (savedData.type2.count || 0) + (savedData.type3.count || 0);
-	if (totalEntered !== validVotes) {
-		if (!confirm(`Số phiếu đã nhập (${totalEntered}) ≠ tổng phiếu hợp lệ (${validVotes}). Tiếp tục?`)) return;
-	}
-	finalResults = {'A':0,'B':0,'C':0,'D':0,'E':0};
-	candidateKeys.forEach(k => {
-		finalResults[k] += savedData.type1[k] || 0;
-		finalResults[k] += savedData.type2[k] || 0;
-	});
-	pairs.forEach((pair, i) => {
-		const val = savedData.type3[i] || 0;
-		candidateKeys.forEach(id => {
-			if (!pair.ids.includes(id)) finalResults[id] += val;
-		});
-	});
-	const tbody = document.querySelector('#resultsTable tbody');
-	tbody.innerHTML = '';	const sorted = Object.keys(finalResults).sort((a,b) => finalResults[b] - finalResults[a]);
-	sorted.forEach((k, idx) => {
-		const row = tbody.insertRow();
-		row.insertCell(0).textContent = idx + 1;
-		row.insertCell(1).textContent = candidates[k];
-		row.insertCell(2).textContent = finalResults[k];
-		const pct = validVotes > 0 ? ((finalResults[k] / validVotes) * 100).toFixed(2) : 0;
-		row.insertCell(3).textContent = pct + '%';
-	});
-	const totalRow = tbody.insertRow();
-	totalRow.style.backgroundColor = '#f5f5f5';
-	totalRow.insertCell(0).textContent = '';
-	totalRow.insertCell(1).innerHTML = '<strong>TỔNG CỘNG:</strong>';
-	totalRow.insertCell(2).innerHTML = '<strong>' + Object.values(finalResults).reduce((a,b)=>a+b,0) + '</strong>';
-	totalRow.insertCell(3).innerHTML = '<strong>100%</strong>';
-	document.getElementById('totalResults').style.display = 'block';
+if (!Object.values(confirmedStatus).every(v => v)) {
+alert('Vui lòng xác nhận tất cả các phần trước khi tính toán!');
+return;
+}
+const validVotes = savedData.general.validVotes || 0;
+const totalEntered = (savedData.type1.count || 0) + (savedData.type2.count || 0) + (savedData.type3.count || 0);
+if (totalEntered !== validVotes) {
+if (!confirm(`Số phiếu đã nhập (${totalEntered}) ≠ tổng phiếu hợp lệ (${validVotes}). Tiếp tục?`)) return;
+}
+finalResults = {'A':0,'B':0,'C':0,'D':0,'E':0};
+candidateKeys.forEach(k => {
+finalResults[k] += savedData.type1[k] || 0;
+finalResults[k] += savedData.type2[k] || 0;
+});
+pairs.forEach((pair, i) => {
+const val = savedData.type3[i] || 0;
+candidateKeys.forEach(id => {
+if (!pair.ids.includes(id)) finalResults[id] += val;
+});
+});
+// Cập nhật bảng xem trước
+updatePreviewTable();
+const tbody = document.querySelector('#resultsTable tbody');
+tbody.innerHTML = '';	const sorted = Object.keys(finalResults).sort((a,b) => finalResults[b] - finalResults[a]);
+sorted.forEach((k, idx) => {
+const row = tbody.insertRow();
+row.insertCell(0).textContent = idx + 1;
+row.insertCell(1).textContent = candidates[k];
+row.insertCell(2).textContent = finalResults[k];
+const pct = validVotes > 0 ? ((finalResults[k] / validVotes) * 100).toFixed(2) : 0;
+row.insertCell(3).textContent = pct + '%';
+});
+const totalRow = tbody.insertRow();
+totalRow.style.backgroundColor = '#f5f5f5';
+totalRow.insertCell(0).textContent = '';
+totalRow.insertCell(1).innerHTML = '<strong>TỔNG CỘNG:</strong>';
+totalRow.insertCell(2).innerHTML = '<strong>' + Object.values(finalResults).reduce((a,b)=>a+b,0) + '</strong>';
+totalRow.insertCell(3).innerHTML = '<strong>100%</strong>';
+document.getElementById('totalResults').style.display = 'block';
 }
 
 function exportToExcel() {
-	const wb = XLSX.utils.book_new();
-	const validVotes = savedData.general.validVotes || 0;
-	const collectedBallots = savedData.general.collectedBallots || 0;
-	const totalVoters = savedData.general.totalVotersUnit || 0;
-	const actualVoters = savedData.general.actualVoters || 0;
+const wb = XLSX.utils.book_new();
+const validVotes = savedData.general.validVotes || 0;
+const collectedBallots = savedData.general.collectedBallots || 0;
+const totalVoters = savedData.general.totalVotersUnit || 0;
+const actualVoters = savedData.general.actualVoters || 0;
+const turnoutPct = totalVoters > 0 ? ((actualVoters / totalVoters) * 100).toFixed(2) : 0;
+const validRate = collectedBallots > 0 ? ((validVotes / collectedBallots) * 100).toFixed(2) : 0;
+const invalidVotes = collectedBallots - validVotes;
+const invalidRate = collectedBallots > 0 ? ((invalidVotes / collectedBallots) * 100).toFixed(2) : 0;
 
-	// Tính tỷ lệ an toàn (tránh chia cho 0)
-	const turnoutPct = totalVoters > 0 ? ((actualVoters / totalVoters) * 100).toFixed(2) : 0;
-	const validRate = collectedBallots > 0 ? ((validVotes / collectedBallots) * 100).toFixed(2) : 0;
-	const invalidVotes = collectedBallots - validVotes;
-	const invalidRate = collectedBallots > 0 ? ((invalidVotes / collectedBallots) * 100).toFixed(2) : 0;
+// --- BIÊN BẢN TỔNG HỢP MỚI ---
+const summaryData = [
+['BIÊN BẢN KIỂM PHIẾU BẦU CỬ (5 BẦU 3)'],
+['Ngày xuất: ' + new Date().toLocaleString('vi-VN')],
+[],
+['THÔNG TIN BẦU CỬ'],
+['Số cử tri đã tham gia bỏ phiếu:', actualVoters + ' người'],
+['Tỷ lệ cử tri đã tham gia bỏ phiếu so với tổng số cử tri của đơn vị bầu cử:', turnoutPct + '%'],
+['Số phiếu phát ra:', savedData.general.issuedBallots + ' phiếu'],
+['Số phiếu thu vào:', collectedBallots + ' phiếu'],
+['Số phiếu hợp lệ:', validVotes + ' phiếu. Tỷ lệ so với tổng số phiếu thu vào: ' + validRate + '%'],
+['Số phiếu không hợp lệ:', invalidVotes + ' phiếu. Tỷ lệ so với tổng số phiếu thu vào: ' + invalidRate + '%'],
+[],
+['KẾT QUẢ BẦU CỬ CHI TIẾT THEO ỨNG CỬ VIÊN']
+];
 
-	const summaryData = [
-		['BIÊN BẢN KIỂM PHIẾU BẦU CỬ (5 BẦU 3)'],
-		['Ngày xuất: ' + new Date().toLocaleString('vi-VN')],
-		[],
-		['THÔNG TIN BẦU CỬ'],
-		['Số cử tri đã tham gia bỏ phiếu:', actualVoters + ' người'],
-		['Tỷ lệ cử tri đã tham gia bỏ phiếu so với tổng số cử tri của đơn vị bầu cử:', turnoutPct + '%'],
-		['Số phiếu phát ra:', savedData.general.issuedBallots + ' phiếu'],
-		['Số phiếu thu vào:', collectedBallots + ' phiếu'],
-		['Số phiếu hợp lệ:', validVotes + ' phiếu. Tỷ lệ so với tổng số phiếu thu vào: ' + validRate + '%'],
-		['Số phiếu không hợp lệ:', invalidVotes + ' phiếu. Tỷ lệ so với tổng số phiếu thu vào: ' + invalidRate + '%'],
-		[],
-		['SỐ PHIẾU BẦU CHO MỖI NGƯỜI ỨNG CỬ NHƯ SAU:']
-	];
+// Tiêu đề bảng chi tiết
+summaryData.push(['STT', 'Họ và tên', 'Số phiếu bầu', '', 'Số phiếu không bầu', '']);
+summaryData.push(['', '', 'Số phiếu', 'Tỷ lệ (%)', 'Số phiếu', 'Tỷ lệ (%)']);
+// Sắp xếp theo số phiếu bầu giảm dần
+const sorted = Object.keys(finalResults).sort((a, b) => finalResults[b] - finalResults[a]);
 
-	// Sắp xếp kết quả theo số phiếu giảm dần
-	const sorted = Object.keys(finalResults).sort((a, b) => finalResults[b] - finalResults[a]);
+let totalBau = 0;
+let totalKhongBau = 0;
 
-	sorted.forEach((key, index) => {
-		const votes = finalResults[key];
-		const pctOfValid = validVotes > 0 ? ((votes / validVotes) * 100).toFixed(2) : 0;
-		const title = candidates[key].startsWith('Nguyễn') ||
-		              candidates[key].startsWith('Trần') ||
-		              candidates[key].startsWith('Lê') ||
-		              candidates[key].startsWith('Hoàng') ||
-		              candidates[key].startsWith('Bùi')
-			? 'Ông/Bà'
-			: 'Ông/Bà'; // Có thể mở rộng danh sách họ nếu cần
-		summaryData.push([
-			(index + 1) + '. ' + title + ' ' + candidates[key] + ' được ' + votes + ' phiếu, ' + pctOfValid + '%/phiếu hợp lệ'
-		]);
-	});
+sorted.forEach((key, index) => {
+const votesBau = finalResults[key];
+const votesKhongBau = validVotes - votesBau;
+const pctBau = validVotes > 0 ? ((votesBau / validVotes) * 100).toFixed(2) : '0.00';
+const pctKhongBau = validVotes > 0 ? ((votesKhongBau / validVotes) * 100).toFixed(2) : '0.00';
 
-	const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
-	ws1['!cols'] = [{ wch: 80 }];
-	XLSX.utils.book_append_sheet(wb, ws1, 'Biên bản tổng hợp');
+totalBau += votesBau;
+totalKhongBau += votesKhongBau;
 
-	// Các sheet chi tiết (giữ nguyên như cũ)
-	const detail1 = [
-		['CHI TIẾT PHIẾU BẦU 1 NGƯỜI (GẠCH 4)'],
-		['Số phiếu loại này: ' + (savedData.type1.count || 0)],
-		[],
-		['STT', 'Ứng viên', 'Số phiếu được bầu']
-	];
-	candidateKeys.forEach((key, index) => {
-		detail1.push([index + 1, candidates[key], savedData.type1[key] || 0]);
-	});
-	const ws2 = XLSX.utils.aoa_to_sheet(detail1);
-	ws2['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }];
-	XLSX.utils.book_append_sheet(wb, ws2, 'Chi tiết Bầu 1');
+summaryData.push([
+index + 1,
+candidates[key],
+votesBau,
+parseFloat(pctBau),
+votesKhongBau,
+parseFloat(pctKhongBau)
+]);
+});
 
-	const detail2 = [
-		['CHI TIẾT PHIẾU BẦU 2 NGƯỜI (GẠCH 3)'],
-		['Số phiếu loại này: ' + (savedData.type2.count || 0)],
-		[],
-		['STT', 'Ứng viên', 'Số phiếu được bầu']
-	];
-	candidateKeys.forEach((key, index) => {
-		detail2.push([index + 1, candidates[key], savedData.type2[key] || 0]);
-	});
-	const ws3 = XLSX.utils.aoa_to_sheet(detail2);
-	ws3['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }];
-	XLSX.utils.book_append_sheet(wb, ws3, 'Chi tiết Bầu 2');
+// Dòng tổng
+summaryData.push([
+'',
+'TỔNG CỘNG',
+totalBau,
+'100.00',
+totalKhongBau,
+'100.00'
+]);
 
-	const detail3 = [
-		['CHI TIẾT PHIẾU BẦU 3 NGƯỜI (GẠCH 2)'],
-		['Số phiếu loại này: ' + (savedData.type3.count || 0)],
-		[],
-		['STT', 'Cặp bị gạch', 'Số phiếu']
-	];
-	pairs.forEach((pair, index) => {
-		const names = pair.ids.map(id => candidates[id]).join(' và ');
-		detail3.push([index + 1, names, savedData.type3[index] || 0]);
-	});
-	const ws4 = XLSX.utils.aoa_to_sheet(detail3);
-	ws4['!cols'] = [{ wch: 5 }, { wch: 35 }, { wch: 15 }];
-	XLSX.utils.book_append_sheet(wb, ws4, 'Chi tiết Bầu 3');
+const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+ws1['!cols'] = [{ wch: 6 }, { wch: 25 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }];
+XLSX.utils.book_append_sheet(wb, ws1, 'Biên bản tổng hợp');
 
-	const fileName = `Bien_ban_kiem_phieu_${new Date().toISOString().slice(0,10)}.xlsx`;
-	XLSX.writeFile(wb, fileName);
-	alert('Đã xuất file Excel thành công!');
+// Các sheet chi tiết (giữ nguyên)
+const detail1 = [
+['CHI TIẾT PHIẾU BẦU 1 NGƯỜI (GẠCH 4)'],
+['Số phiếu loại này: ' + (savedData.type1.count || 0)],
+[],
+['STT', 'Ứng viên', 'Số phiếu được bầu']
+];
+candidateKeys.forEach((key, index) => {
+detail1.push([index + 1, candidates[key], savedData.type1[key] || 0]);
+});
+const ws2 = XLSX.utils.aoa_to_sheet(detail1);ws2['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }];
+XLSX.utils.book_append_sheet(wb, ws2, 'Chi tiết Bầu 1');
+
+const detail2 = [
+['CHI TIẾT PHIẾU BẦU 2 NGƯỜI (GẠCH 3)'],
+['Số phiếu loại này: ' + (savedData.type2.count || 0)],
+[],
+['STT', 'Ứng viên', 'Số phiếu được bầu']
+];
+candidateKeys.forEach((key, index) => {
+detail2.push([index + 1, candidates[key], savedData.type2[key] || 0]);
+});
+const ws3 = XLSX.utils.aoa_to_sheet(detail2);
+ws3['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }];
+XLSX.utils.book_append_sheet(wb, ws3, 'Chi tiết Bầu 2');
+
+const detail3 = [
+['CHI TIẾT PHIẾU BẦU 3 NGƯỜI (GẠCH 2)'],
+['Số phiếu loại này: ' + (savedData.type3.count || 0)],
+[],
+['STT', 'Cặp bị gạch', 'Số phiếu']
+];
+pairs.forEach((pair, index) => {
+const names = pair.ids.map(id => candidates[id]).join(' và ');
+detail3.push([index + 1, names, savedData.type3[index] || 0]);
+});
+const ws4 = XLSX.utils.aoa_to_sheet(detail3);
+ws4['!cols'] = [{ wch: 5 }, { wch: 35 }, { wch: 15 }];
+XLSX.utils.book_append_sheet(wb, ws4, 'Chi tiết Bầu 3');
+
+const fileName = `Bien_ban_kiem_phieu_${new Date().toISOString().slice(0,10)}.xlsx`;
+XLSX.writeFile(wb, fileName);
+alert('Đã xuất file Excel thành công!');
 }
 </script>
 </body>
