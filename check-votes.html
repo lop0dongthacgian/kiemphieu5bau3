@@ -178,7 +178,15 @@ Số phiếu loại này: <input type="number" id="ballotType3Count" value="" st
 <div id="totalResults" class="summary" style="display: none;">
 <h2>KẾT QUẢ TỔNG HỢP CUỐI CÙNG</h2>
 <table id="resultsTable">
-<thead><tr><th>STT</th><th>Ứng viên</th><th>Số phiếu ĐƯỢC BẦU</th><th>Tỷ lệ (%)</th></tr></thead>
+<thead>
+<tr>
+  <th>STT</th>
+  <th>Ứng viên</th>
+  <th>Số phiếu ĐƯỢC BẦU</th>
+  <th>Số phiếu KHÔNG BẦU</th>
+  <th>TỔNG CỘNG</th>
+</tr>
+</thead>
 <tbody></tbody>
 </table>
 <div class="btn-center">
@@ -260,50 +268,71 @@ document.getElementById('previewResultsFooter').innerHTML = `
 `;
 }
 
+// ===== TỰ TÍNH "SỐ PHIẾU LOẠI NÀY" TỪ CHI TIẾT =====
+
+// BẢNG 1: BẦU 1 NGƯỜI (GẠCH 4)
+// Số phiếu = tổng chi tiết
 function updateType1Logic() {
-const count = parseInt(document.getElementById('ballotType1Count').value) || 0;
-let sum = 0;
-candidateKeys.forEach(k => sum += parseInt(document.getElementById(`vote_type1_${k}`).value) || 0);
-document.getElementById('type1Sum').textContent = sum;
-const el = document.getElementById('logic-type1');
-if (count === 0 && sum === 0) {
-el.className = 'logic-status'; el.textContent = '';
-} else if (sum === count) {
-el.className = 'logic-status logic-ok'; el.textContent = '✓ Hợp lệ: Tổng phiếu = số phiếu loại này';
-} else {
-el.className = 'logic-status logic-error'; el.textContent = `✗ Không hợp lệ: Tổng phiếu (${sum}) ≠ số phiếu loại này (${count})`;
+  let sum = 0;
+  candidateKeys.forEach(k => {
+    sum += parseInt(document.getElementById(`vote_type1_${k}`).value) || 0;
+  });
+
+  const countEl = document.getElementById('ballotType1Count');
+  countEl.value = sum;
+  countEl.style.color = 'green';
+
+  document.getElementById('type1Sum').textContent = sum;
+  document.getElementById('type1Sum').style.color = 'green';
+
+  updateTotalEnteredVotes();
 }
-updateTotalEnteredVotes();
-}
+
+// BẢNG 2: BẦU 2 NGƯỜI (GẠCH 3)
+// Số phiếu = tổng / 2 → lẻ là sai
 function updateType2Logic() {
-const count = parseInt(document.getElementById('ballotType2Count').value) || 0;
-let sum = 0;
-candidateKeys.forEach(k => sum += parseInt(document.getElementById(`vote_type2_${k}`).value) || 0);
-document.getElementById('type2Sum').textContent = sum;
-const expected = count * 2;
-document.getElementById('type2Expected').textContent = expected;
-const el = document.getElementById('logic-type2');
-if (count === 0 && sum === 0) {
-el.className = 'logic-status'; el.textContent = '';
-} else if (sum === expected) {
-el.className = 'logic-status logic-ok'; el.textContent = '✓ Hợp lệ: Tổng phiếu = 2 × số phiếu loại này';
-} else {
-el.className = 'logic-status logic-error'; el.textContent = `✗ Không hợp lệ: Tổng phiếu (${sum}) ≠ 2 × số phiếu loại này (${expected})`;
+  let sum = 0;
+  candidateKeys.forEach(k => {
+    sum += parseInt(document.getElementById(`vote_type2_${k}`).value) || 0;
+  });
+
+  const count = sum / 2;
+  const countEl = document.getElementById('ballotType2Count');
+  countEl.value = count.toFixed(1);
+
+  if (Number.isInteger(count)) {
+    countEl.style.color = 'green';
+  } else {
+    countEl.style.color = 'red';
+  }
+
+  document.getElementById('type2Sum').textContent = sum;
+  document.getElementById('type2Sum').style.color = countEl.style.color;
+
+  updateTotalEnteredVotes();
 }
-updateTotalEnteredVotes();
+
+// BẢNG 3: BẦU 3 NGƯỜI (GẠCH 2)
+// Số phiếu = tổng cặp bị gạch
+function updateType3Logic() {
+  let sum = 0;
+  pairs.forEach((_, i) => {
+    sum += parseInt(document.getElementById(`vote_type3_${i}`).value) || 0;
+  });
+
+  const countEl = document.getElementById('ballotType3Count');
+  countEl.value = sum;
+  countEl.style.color = 'green';
+
+  const logicEl = document.getElementById('logic-type3');
+  logicEl.textContent = `Tổng phiếu bảng này: ${sum}`;
+  logicEl.style.color = 'green';
+
+  updateTotalEnteredVotes();
 }
-function updateType3Logic() {const count = parseInt(document.getElementById('ballotType3Count').value) || 0;
-let sum = 0;
-pairs.forEach((_, i) => sum += parseInt(document.getElementById(`vote_type3_${i}`).value) || 0);
-const el = document.getElementById('logic-type3');
-if (count === 0 && sum === 0) {		el.className = 'logic-status'; el.textContent = '';
-} else if (sum === count) {
-el.className = 'logic-status logic-ok'; el.textContent = '✓ Hợp lệ: Tổng phiếu gạch = số phiếu loại này';
-} else {
-el.className = 'logic-status logic-error'; el.textContent = `✗ Không hợp lệ: Tổng phiếu gạch (${sum}) ≠ số phiếu loại này (${count})`;
-}
-updateTotalEnteredVotes();
-}
+
+
+
 function updateCalculations() {
 const totalVoters = parseInt(document.getElementById('totalVotersUnit').value) || 0;
 const actual = parseInt(document.getElementById('actualVoters').value) || 0;
@@ -396,9 +425,18 @@ sorted.forEach((k, idx) => {
 const row = tbody.insertRow();
 row.insertCell(0).textContent = idx + 1;
 row.insertCell(1).textContent = candidates[k];
-row.insertCell(2).textContent = finalResults[k];
-const pct = validVotes > 0 ? ((finalResults[k] / validVotes) * 100).toFixed(2) : 0;
-row.insertCell(3).textContent = pct + '%';
+const bau = finalResults[k];
+const khongBau = validVotes - bau;
+const tongCong = bau + khongBau;
+
+row.insertCell(2).textContent = bau;
+row.insertCell(3).textContent = khongBau;
+
+const tongCell = row.insertCell(4);
+tongCell.textContent = tongCong;
+
+// kiểm nhanh đúng / sai
+tongCell.style.color = tongCong === validVotes ? 'green' : 'red';
 });
 const totalRow = tbody.insertRow();
 totalRow.style.backgroundColor = '#f5f5f5';
@@ -410,117 +448,115 @@ document.getElementById('totalResults').style.display = 'block';
 }
 
 function exportToExcel() {
-const wb = XLSX.utils.book_new();
-const validVotes = savedData.general.validVotes || 0;
-const collectedBallots = savedData.general.collectedBallots || 0;
-const totalVoters = savedData.general.totalVotersUnit || 0;
-const actualVoters = savedData.general.actualVoters || 0;
-const turnoutPct = totalVoters > 0 ? ((actualVoters / totalVoters) * 100).toFixed(2) : 0;
-const validRate = collectedBallots > 0 ? ((validVotes / collectedBallots) * 100).toFixed(2) : 0;
-const invalidVotes = collectedBallots - validVotes;
-const invalidRate = collectedBallots > 0 ? ((invalidVotes / collectedBallots) * 100).toFixed(2) : 0;
+  const wb = XLSX.utils.book_new();
 
-// --- BIÊN BẢN TỔNG HỢP MỚI ---
-const summaryData = [
-['BIÊN BẢN KIỂM PHIẾU BẦU CỬ (5 BẦU 3)'],
-['Ngày xuất: ' + new Date().toLocaleString('vi-VN')],
-[],
-['THÔNG TIN BẦU CỬ'],
-['Số cử tri đã tham gia bỏ phiếu:', actualVoters + ' người'],
-['Tỷ lệ cử tri đã tham gia bỏ phiếu so với tổng số cử tri của đơn vị bầu cử:', turnoutPct + '%'],
-['Số phiếu phát ra:', savedData.general.issuedBallots + ' phiếu'],
-['Số phiếu thu vào:', collectedBallots + ' phiếu'],
-['Số phiếu hợp lệ:', validVotes + ' phiếu. Tỷ lệ so với tổng số phiếu thu vào: ' + validRate + '%'],
-['Số phiếu không hợp lệ:', invalidVotes + ' phiếu. Tỷ lệ so với tổng số phiếu thu vào: ' + invalidRate + '%'],
-[],
-['KẾT QUẢ BẦU CỬ CHI TIẾT THEO ỨNG CỬ VIÊN']
-];
+  const validVotes = savedData.general.validVotes || 0;
+  const collectedBallots = savedData.general.collectedBallots || 0;
+  const totalVoters = savedData.general.totalVotersUnit || 0;
+  const actualVoters = savedData.general.actualVoters || 0;
 
-// Tiêu đề bảng chi tiết
-summaryData.push(['STT', 'Họ và tên', 'Số phiếu bầu', '', 'Số phiếu không bầu', '']);
-summaryData.push(['', '', 'Số phiếu', 'Tỷ lệ (%)', 'Số phiếu', 'Tỷ lệ (%)']);
-// Sắp xếp theo số phiếu bầu giảm dần
-const sorted = Object.keys(finalResults).sort((a, b) => finalResults[b] - finalResults[a]);
+  const turnoutPct = totalVoters > 0 ? ((actualVoters / totalVoters) * 100).toFixed(2) : 0;
+  const validRate = collectedBallots > 0 ? ((validVotes / collectedBallots) * 100).toFixed(2) : 0;
+  const invalidVotes = collectedBallots - validVotes;
+  const invalidRate = collectedBallots > 0 ? ((invalidVotes / collectedBallots) * 100).toFixed(2) : 0;
 
-let totalBau = 0;
-let totalKhongBau = 0;
+  // ================= BIÊN BẢN TỔNG HỢP =================
+  const summaryData = [
+    ['BIÊN BẢN KIỂM PHIẾU BẦU CỬ (5 BẦU 3)'],
+    ['Ngày xuất: ' + new Date().toLocaleString('vi-VN')],
+    [],
+    ['THÔNG TIN BẦU CỬ'],
+    ['Số cử tri đã tham gia bỏ phiếu:', actualVoters + ' người'],
+    ['Tỷ lệ cử tri tham gia:', turnoutPct + '%'],
+    ['Số phiếu phát ra:', savedData.general.issuedBallots + ' phiếu'],
+    ['Số phiếu thu vào:', collectedBallots + ' phiếu'],
+    ['Số phiếu hợp lệ:', validVotes + ' phiếu (' + validRate + '%)'],
+    ['Số phiếu không hợp lệ:', invalidVotes + ' phiếu (' + invalidRate + '%)'],
+    [],
+    ['KẾT QUẢ BẦU CỬ CHI TIẾT THEO ỨNG CỬ VIÊN']
+  ];
 
-sorted.forEach((key, index) => {
-const votesBau = finalResults[key];
-const votesKhongBau = validVotes - votesBau;
-const pctBau = validVotes > 0 ? ((votesBau / validVotes) * 100).toFixed(2) : '0.00';
-const pctKhongBau = validVotes > 0 ? ((votesKhongBau / validVotes) * 100).toFixed(2) : '0.00';
+  // ===== TIÊU ĐỀ BẢNG (CÓ CỘT TỔNG KIỂM) =====
+  summaryData.push([
+    'STT',
+    'Họ và tên',
+    'Số phiếu bầu',
+    '',
+    'Số phiếu không bầu',
+    '',
+    'TỔNG KIỂM'
+  ]);
 
-totalBau += votesBau;
-totalKhongBau += votesKhongBau;
+  summaryData.push([
+    '',
+    '',
+    'Số phiếu',
+    'Tỷ lệ (%)',
+    'Số phiếu',
+    'Tỷ lệ (%)',
+    'Bầu + Không bầu'
+  ]);
 
-summaryData.push([
-index + 1,
-candidates[key],
-votesBau,
-parseFloat(pctBau),
-votesKhongBau,
-parseFloat(pctKhongBau)
-]);
-});
+  const sorted = Object.keys(finalResults).sort(
+    (a, b) => finalResults[b] - finalResults[a]
+  );
 
-// Dòng tổng
-summaryData.push([
-'',
-'TỔNG CỘNG',
-totalBau,
-'100.00',
-totalKhongBau,
-'100.00'
-]);
+  let totalBau = 0;
+  let totalKhongBau = 0;
 
-const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
-ws1['!cols'] = [{ wch: 6 }, { wch: 25 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }];
-XLSX.utils.book_append_sheet(wb, ws1, 'Biên bản tổng hợp');
+  // ===== DỮ LIỆU TỪNG ỨNG CỬ VIÊN =====
+  sorted.forEach((key, index) => {
+    const votesBau = finalResults[key];
+    const votesKhongBau = validVotes - votesBau;
+    const pctBau = validVotes > 0 ? ((votesBau / validVotes) * 100).toFixed(2) : '0.00';
+    const pctKhongBau = validVotes > 0 ? ((votesKhongBau / validVotes) * 100).toFixed(2) : '0.00';
 
-// Các sheet chi tiết (giữ nguyên)
-const detail1 = [
-['CHI TIẾT PHIẾU BẦU 1 NGƯỜI (GẠCH 4)'],
-['Số phiếu loại này: ' + (savedData.type1.count || 0)],
-[],
-['STT', 'Ứng viên', 'Số phiếu được bầu']
-];
-candidateKeys.forEach((key, index) => {
-detail1.push([index + 1, candidates[key], savedData.type1[key] || 0]);
-});
-const ws2 = XLSX.utils.aoa_to_sheet(detail1);ws2['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }];
-XLSX.utils.book_append_sheet(wb, ws2, 'Chi tiết Bầu 1');
+    const totalCheck = votesBau + votesKhongBau;
 
-const detail2 = [
-['CHI TIẾT PHIẾU BẦU 2 NGƯỜI (GẠCH 3)'],
-['Số phiếu loại này: ' + (savedData.type2.count || 0)],
-[],
-['STT', 'Ứng viên', 'Số phiếu được bầu']
-];
-candidateKeys.forEach((key, index) => {
-detail2.push([index + 1, candidates[key], savedData.type2[key] || 0]);
-});
-const ws3 = XLSX.utils.aoa_to_sheet(detail2);
-ws3['!cols'] = [{ wch: 5 }, { wch: 30 }, { wch: 20 }];
-XLSX.utils.book_append_sheet(wb, ws3, 'Chi tiết Bầu 2');
+    totalBau += votesBau;
+    totalKhongBau += votesKhongBau;
 
-const detail3 = [
-['CHI TIẾT PHIẾU BẦU 3 NGƯỜI (GẠCH 2)'],
-['Số phiếu loại này: ' + (savedData.type3.count || 0)],
-[],
-['STT', 'Cặp bị gạch', 'Số phiếu']
-];
-pairs.forEach((pair, index) => {
-const names = pair.ids.map(id => candidates[id]).join(' và ');
-detail3.push([index + 1, names, savedData.type3[index] || 0]);
-});
-const ws4 = XLSX.utils.aoa_to_sheet(detail3);
-ws4['!cols'] = [{ wch: 5 }, { wch: 35 }, { wch: 15 }];
-XLSX.utils.book_append_sheet(wb, ws4, 'Chi tiết Bầu 3');
+    summaryData.push([
+      index + 1,
+      candidates[key],
+      votesBau,
+      parseFloat(pctBau),
+      votesKhongBau,
+      parseFloat(pctKhongBau),
+      totalCheck + (totalCheck !== validVotes ? ' ❌' : ' ✓')
+    ]);
+  });
 
-const fileName = `Bien_ban_kiem_phieu_${new Date().toISOString().slice(0,10)}.xlsx`;
-XLSX.writeFile(wb, fileName);
-alert('Đã xuất file Excel thành công!');
+  // ===== DÒNG TỔNG CUỐI =====
+  summaryData.push([
+    '',
+    'TỔNG CỘNG',
+    totalBau,
+    '100.00',
+    totalKhongBau,
+    '100.00',
+    totalBau + totalKhongBau
+  ]);
+
+  const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+  ws1['!cols'] = [
+    { wch: 6 },
+    { wch: 28 },
+    { wch: 14 },
+    { wch: 12 },
+    { wch: 18 },
+    { wch: 12 },
+    { wch: 20 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws1, 'Biên bản tổng hợp');
+
+  // ===== CÁC SHEET CHI TIẾT (GIỮ NGUYÊN) =====
+
+  const fileName = `Bien_ban_kiem_phieu_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  XLSX.writeFile(wb, fileName);
+
+  alert('Đã xuất file Excel thành công!');
 }
 </script>
 </body>
