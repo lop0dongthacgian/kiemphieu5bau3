@@ -129,31 +129,32 @@ body { background: none; }
 <div class="vote-group">PHIẾU BẦU 1</div>
 <div class="vote-group">PHIẾU BẦU 2</div>
 <div id="ab-box" class="vote-group"></div>
-<div class="footer-note">Trang 1/6</div>
+<div class="footer-note">Trang 1/7</div>
 </div>
 <div class="page">
 <div id="ac-box" class="vote-group"></div>
 <div id="ad-box" class="vote-group"></div>
 <div id="ae-box" class="vote-group"></div>
 <div id="bc-box" class="vote-group"></div>
-<div class="footer-note">Trang 2/6</div>
+<div class="footer-note">Trang 2/7</div>
 </div>
 <div class="page">
 <div id="bd-box" class="vote-group"></div>
 <div id="be-box" class="vote-group"></div>
 <div id="cd-box" class="vote-group"></div>
 <div id="ce-box" class="vote-group"></div>
-<div class="footer-note">Trang 3/6</div>
+<div class="footer-note">Trang 3/7</div>
 </div>
-<div class="page"><div id="de-box" class="vote-group"></div>
+<div class="page">
+<div id="de-box" class="vote-group"></div>
 <div class="vote-group"></div>
 <div class="vote-group"></div>
 <div class="vote-group"></div>
-<div class="footer-note">Trang 4/6</div>
+<div class="footer-note">Trang 4/7</div>
 </div>
 <div class="page page-table">
 <div class="table-container">
-<div class="table-title">PHỤ LỤC 1: BẢNG KIỂM PHIẾU ĐƯỢC BẦU (KIỂM XUÔI)</div>
+<div class="table-title">BẢNG KIỂM PHIẾU BẦU MỘT (KIỂM XUÔI)</div>
 <table>
 <thead>
 <tr>
@@ -165,11 +166,28 @@ body { background: none; }
 <tbody id="table-bau-body"></tbody>
 </table>
 </div>
-<div class="footer-note">Trang 5/6</div>
+<div class="footer-note">Trang 5/7</div>
+</div>
+<!-- THÊM TRANG MỚI BẢNG KIỂM PHIẾU BẦU HAI (KIỂM XUÔI) -->
+<div class="page page-table">
+<div class="table-container">
+<div class="table-title">BẢNG KIỂM PHIẾU BẦU HAI (KIỂM XUÔI)</div>
+<table>
+<thead>
+<tr>
+<th style="width: 10%;">STT</th>
+<th style="width: 50%;">Họ và tên ứng cử viên</th>
+<th style="width: 40%;">Số phiếu được bầu</th>
+</tr>
+</thead>
+<tbody id="table-bau-body-2"></tbody>
+</table>
+</div>
+<div class="footer-note">Trang 6/7</div>
 </div>
 <div class="page page-table">
 <div class="table-container">
-<div class="table-title">PHỤ LỤC 2: BẢNG KIỂM PHIẾU BỊ GẠCH (KIỂM NGƯỢC)</div>
+<div class="table-title">BẢNG KIỂM PHIẾU BỊ GẠCH (KIỂM NGƯỢC)</div>
 <table>
 <thead>
 <tr>
@@ -181,7 +199,7 @@ body { background: none; }
 <tbody id="table-gach-body"></tbody>
 </table>
 </div>
-<div class="footer-note">Trang 6/6</div>
+<div class="footer-note">Trang 7/7</div>
 </div>
 </div>
 
@@ -215,7 +233,7 @@ function updateCandidateNames() {
     }
   });
 
-  // Cập nhật Bảng Trang 5 (Kiểm xuôi)
+  // Cập nhật Bảng Trang 5 (Kiểm xuôi - Phiếu bầu một)
   const bauBody = document.getElementById('table-bau-body');
   if (bauBody) {
     bauBody.innerHTML = '';
@@ -224,7 +242,16 @@ function updateCandidateNames() {
     });
   }
 
-  // Cập nhật Bảng Trang 6 (Kiểm ngược) – vẫn giữ "Gạch" ở đây vì là mô tả
+  // Cập nhật Bảng Trang 6 (Kiểm xuôi - Phiếu bầu hai) - CÙNG NỘI DUNG NHƯ TRANG 5
+  const bauBody2 = document.getElementById('table-bau-body-2');
+  if (bauBody2) {
+    bauBody2.innerHTML = '';
+    Object.keys(candidates).forEach((key, index) => {
+      bauBody2.innerHTML += `<tr><td>${index + 1}</td><td style="text-align:left; padding-left:20px;">${candidates[key]}</td><td></td></tr>`;
+    });
+  }
+
+  // Cập nhật Bảng Trang 7 (Kiểm ngược) – vẫn giữ "Gạch" ở đây vì là mô tả
   const gachBody = document.getElementById('table-gach-body');
   if (gachBody) {
     gachBody.innerHTML = '';
@@ -234,6 +261,7 @@ function updateCandidateNames() {
     });
   }
 }
+
 function confirmDownload() {
   if (confirm("Bạn có muốn tải mẫu để in dưới dạng PDF không?")) {
     downloadPDF();
@@ -264,10 +292,10 @@ async function downloadPDF() {
     }
     pdf.save('Mau_In.pdf');
 
-// Tự quay về trang chủ sau khi tải xong
-setTimeout(() => {
-  window.location.href = "index.html";
-}, 500);
+    // Tự quay về trang chủ sau khi tải xong
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 500);
   } catch (error) {
     alert('Có lỗi xảy ra khi tạo PDF: ' + error.message);
   } finally {
