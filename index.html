@@ -9,16 +9,24 @@ body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; color: #3
 .container { max-width: 900px; margin: 0 auto; }
 h1 { font-size: clamp(20px, 5vw, 32px); color: #1E29FF; text-align: center; text-transform: uppercase; }
 h2 { color: #2c3e50; border-left: 1px solid #1E29FF; border-right: 1px solid #1E29FF; padding-left: 10px; margin-top: 30px; text-align: center;}
+h3 { color: #d32f2f; font-size: 1.3em; margin-top: 25px; }
 .candidate-list { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
 table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
 th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
 th { background-color: #f2f2f2; color: #2c3e50; }
 .invalid { color: #d32f2f; font-weight: bold; background-color: #fff5f5; }
 .valid { color: #2e7d32; font-weight: bold; background-color: #f1f8e9; }
+.group-header { background-color: #e3f2fd; font-weight: bold; font-size: 1.1em; color: #1565c0; }
+.group-number { background-color: #fff3e0; font-weight: bold; text-align: center; }
 .nav-box { text-align: center; margin: 40px 0; }
 button.btn-start { padding: 15px 40px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 button.btn-start:hover { background-color: #45a049; transform: translateY(-2px); }
 .note { font-style: italic; color: #666; font-size: 0.9em; }
+.summary-box { background: #fffde7; border: 2px solid #fbc02d; padding: 20px; margin: 30px 0; border-radius: 8px; }
+.summary-box h3 { color: #f57c00; margin-top: 0; text-align: center; font-size: 1.5em; }
+.summary-list { font-size: 1.1em; line-height: 2; }
+.summary-list li { margin: 8px 0; }
+.summary-list strong { color: #d32f2f; }
 #detail-table + .note { color: red; font-size: 18px; font-weight: 600; }
 @media (max-width: 600px) { 
   #detail-table + .note { font-size: 16px; }
@@ -35,65 +43,101 @@ button.btn-start:hover { background-color: #45a049; transform: translateY(-2px);
   <p class="note">Đây là ví dụ, thay khi có công bố</p>
 </div>
 
-<h2>Phân loại phiếu bầu thành 13 nhóm như sau:</h2>
+<div class="summary-box">
+  <h3>📊 TỔNG QUAN: PHÂN LOẠI 13 NHÓM PHIẾU BẦU</h3>
+  <ul class="summary-list">
+    <li><strong>Nhóm 1:</strong> Phiếu bất hợp lệ (5 loại phiếu không hợp lệ gộp chung)</li>
+    <li><strong>Nhóm 2:</strong> Phiếu bầu 1 (gạch 4, bầu 1)</li>
+    <li><strong>Nhóm 3:</strong> Phiếu bầu 2 (gạch 3, bầu 2)</li>
+    <li><strong>Nhóm 4-13:</strong> Phiếu bầu đủ 3 (gạch 2, bầu 3) - <strong>Chia thành 10 nhóm</strong> theo từng cặp bị gạch:</li>
+    <ul style="margin-left: 30px; margin-top: 10px;">
+      <li>Nhóm 4: Gạch A-B</li>
+      <li>Nhóm 5: Gạch A-C</li>
+      <li>Nhóm 6: Gạch A-D</li>
+      <li>Nhóm 7: Gạch A-E</li>
+      <li>Nhóm 8: Gạch B-C</li>
+      <li>Nhóm 9: Gạch B-D</li>
+      <li>Nhóm 10: Gạch B-E</li>
+      <li>Nhóm 11: Gạch C-D</li>
+      <li>Nhóm 12: Gạch C-E</li>
+      <li>Nhóm 13: Gạch D-E</li>
+    </ul>
+  </ul>
+</div>
 
-<h3>I. Phiếu bất hợp lệ (1 nhóm)</h3>
-<p class="note">Là những phiếu thuộc 5 loại sau:</p>
+<h2>CHI TIẾT 13 NHÓM PHÂN LOẠI</h2>
+
+<h3>NHÓM 1: Phiếu bất hợp lệ</h3>
+<p class="note">Gồm 5 loại sau (gộp chung thành 1 nhóm):</p>
 <table>
   <thead>
     <tr>
-      <th>STT</th>
-      <th>Loại phiếu</th>
-      <th>Trạng thái</th>
-    </tr>
-  </thead>
-  <tbody>    <tr class="invalid"><td>1</td><td>Không có dấu của tổ bầu cử</td><td>Bất hợp lệ</td></tr>
-    <tr class="invalid"><td>2</td><td>Ghi thêm vào phiếu</td><td>Bất hợp lệ</td></tr>
-    <tr class="invalid"><td>3</td><td>Gạch không đúng dòng họ và tên</td><td>Bất hợp lệ</td></tr>
-    <tr class="invalid"><td>4</td><td>Phiếu để trống</td><td>Bất hợp lệ</td></tr>
-    <tr class="invalid"><td>5</td><td>Gạch hết 5 người hoặc chỉ gạch 1 người</td><td>Bất hợp lệ</td></tr>
-  </tbody>
-</table>
-
-<h3>II. Phiếu hợp lệ (Phân thành 12 nhóm)</h3>
-<p class="note">Gồm các loại sau: <br> (Phiếu bầu1 và bầu 2 rất ít, kiểm riêng
-      phiếu được bầu cho từng ứng viên theo cách cũ: gạch thành ô – 5 gạch chéo →Đếm tổng được bầu từng người để nhập bảng)</p>
-<table>
-  <thead>
-    <tr>
-      <th>Loại phiếu</th>
-      <th>Số người bị gạch</th>
-      <th>Số người được bầu</th>
-      <th>Trạng thái</th>
+      <th style="width: 80px;">Loại</th>
+      <th>Mô tả</th>
+      <th style="width: 120px;">Trạng thái</th>
     </tr>
   </thead>
   <tbody>
-    <tr class="valid"><td>Phiếu bầu 1</td><td>4</td><td>1</td><td>Hợp lệ</td></tr>
-    <tr class="valid"><td>Phiếu bầu 2</td><td>3</td><td>2</td><td>Hợp lệ</td></tr>
-    <tr class="valid"><td>Phiếu bầu đủ 3<br><span style="font-weight: normal; font-style: italic; color:#1E29FF;">(Phân chi tiết phía dưới)</span></td><td>2</td><td>3</td><td>Hợp lệ</td></tr>
+    <tr class="invalid"><td>Loại 1</td><td>Không có dấu của tổ bầu cử</td><td>Bất hợp lệ</td></tr>
+    <tr class="invalid"><td>Loại 2</td><td>Ghi thêm vào phiếu</td><td>Bất hợp lệ</td></tr>
+    <tr class="invalid"><td>Loại 3</td><td>Gạch không đúng dòng họ và tên</td><td>Bất hợp lệ</td></tr>
+    <tr class="invalid"><td>Loại 4</td><td>Phiếu để trống</td><td>Bất hợp lệ</td></tr>
+    <tr class="invalid"><td>Loại 5</td><td>Gạch hết 5 người hoặc chỉ gạch 1 người</td><td>Bất hợp lệ</td></tr>
   </tbody>
 </table>
 
-<h2>Phân chi tiết trường hợp "Phiếu bầu đủ 3" (gạch 2 người)</h2>
-<p class="note">Đây là trường hợp phổ biến nhất – phân riêng theo từng cặp bị gạch: A-B, A-C, A-D, A-E, B-C, B-D, B-E, C-D, C-E, D-E.<br>
-Sau khi kiểm, kẹp theo lốc 100 cho dễ đếm.<br>
-→Đếm tổng bị gạch từng cặp để nhập bảng.</p>
+<h3>NHÓM 2-3: Phiếu hợp lệ (bầu 1 hoặc 2 người)</h3>
+<p class="note">Kiểm riêng theo cách cũ: gạch thành ô – 5 gạch chéo → Đếm tổng được bầu từng người để nhập bảng</p>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 100px;">Nhóm</th>
+      <th>Loại phiếu</th>
+      <th style="width: 120px;">Số gạch</th>
+      <th style="width: 120px;">Số được bầu</th>
+      <th style="width: 120px;">Trạng thái</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="valid">
+      <td class="group-number">NHÓM 2</td>
+      <td>Phiếu bầu 1</td>
+      <td>4</td>
+      <td>1</td>
+      <td>Hợp lệ</td>
+    </tr>
+    <tr class="valid">
+      <td class="group-number">NHÓM 3</td>
+      <td>Phiếu bầu 2</td>
+      <td>3</td>
+      <td>2</td>
+      <td>Hợp lệ</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>NHÓM 4-13: Phiếu bầu đủ 3 (gạch 2 người)</h3>
+<p class="note">Phân riêng theo từng cặp bị gạch thành 10 nhóm.<br>
+Sau khi kiểm, kẹp theo lốc 100 cho dễ đếm → Đếm tổng bị gạch từng cặp để nhập bảng.</p>
 
 <table id="detail-table">
   <thead>
     <tr>
-      <th>STT</th>
+      <th style="width: 100px;">Nhóm</th>
       <th>Ứng viên bị gạch</th>
       <th>Ứng viên được bầu</th>
-      <th>Kết quả</th>
+      <th style="width: 120px;">Trạng thái</th>
     </tr>
   </thead>
   <tbody id="detail-body">
   </tbody>
 </table>
 
-<p class="note"><u>Ghi chú:</u> Có thể in 13 bảng tên từng loại: Dùng hộp hoặc phân vùng để bỏ vào khi kiểm, đếm.<br>
-"Phiếu bất hợp lệ", "Phiếu bầu 1",  "Phiếu bầu 2", Ghi tên các cặp bị gạch "A-B", "A-C", "A-D", "A-E", "B-C", "B-D", "B-E", "C-D", "C-E", "D-E".</p>
+<p class="note"><u>Ghi chú:</u> Có thể in 13 bảng tên từng nhóm để phân loại:<br>
+<strong>Nhóm 1:</strong> "Phiếu bất hợp lệ"<br>
+<strong>Nhóm 2:</strong> "Phiếu bầu 1"<br>
+<strong>Nhóm 3:</strong> "Phiếu bầu 2"<br>
+<strong>Nhóm 4-13:</strong> Ghi tên các cặp bị gạch "A-B", "A-C", "A-D", "A-E", "B-C", "B-D", "B-E", "C-D", "C-E", "D-E"</p>
 
 <!-- Nút tải bản in mẫu -->
 <div style="text-align: center; margin: 30px 0;">
@@ -108,7 +152,7 @@ Sau khi kiểm, kẹp theo lốc 100 cho dễ đếm.<br>
                  cursor: pointer; 
                  transition: all 0.3s;
                  margin-bottom: 20px;">
-    📄 Tải bản in mẫu
+    📄 Tải bản in mẫu 🖨️
   </button>
 </div>
 
@@ -139,20 +183,26 @@ const combinations = [
 combinations.forEach((pair, index) => {
   const row = document.createElement('tr');
   row.className = 'valid';
-  // Cột 1: STT
-  const td1 = document.createElement('td');
-  td1.textContent = index + 1;
+  
+  // Cột nhóm
+  const tdGroup = document.createElement('td');
+  tdGroup.className = 'group-number';
+  tdGroup.textContent = 'NHÓM ' + (index + 4);
+  
   // Cột 2: Bị gạch
   const td2 = document.createElement('td');
   td2.textContent = pair.map(k => candidates[k]).join(', ');
-  // Cột 3: Được bầu (Những người không nằm trong cặp bị gạch)
+  
+  // Cột 3: Được bầu
   const td3 = document.createElement('td');
   const elected = candidateKeys.filter(k => !pair.includes(k));
   td3.textContent = elected.map(k => candidates[k]).join(', ');
+  
   // Cột 4: Kết quả
   const td4 = document.createElement('td');
-  td4.textContent = 'Phiếu hợp lệ';
-  row.appendChild(td1);
+  td4.textContent = 'Hợp lệ';
+  
+  row.appendChild(tdGroup);
   row.appendChild(td2);
   row.appendChild(td3);
   row.appendChild(td4);
